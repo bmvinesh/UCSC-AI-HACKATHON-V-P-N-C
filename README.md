@@ -1,0 +1,2 @@
+# UCSC-AI-HACKATHON-V-P-N-C
+UCSC AI Hackathon
