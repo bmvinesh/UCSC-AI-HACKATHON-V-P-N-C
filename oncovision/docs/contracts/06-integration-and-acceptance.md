@@ -1,71 +1,79 @@
 # Integration schedule and acceptance record
 
-Read [the shared contract](00-shared-contract.md). This preserves the original scope and stages integration early. Times are elapsed hours from team kickoff, not promises of measured hardware performance.
+Version 2.0. Read [the shared contract](00-shared-contract.md). Praneeth and Vinesh own the critical path; Nisheeth and Chaandan have independent support deliverables. Scope is preserved. Times are elapsed from kickoff, not hardware performance promises.
+
+## Critical-path agreement
+
+- **Praneeth (R1):** frontend, GX10 setup, LLM serving, telemetry, deployment, hardware checks, release integration. Works directly on GX10 with Claude Code.
+- **Vinesh (R4):** backend, schemas/generated clients, vision/artifacts, report grounding, domain tests. Supplies executable hardware probes to Praneeth early.
+- **Nisheeth (R2):** prepared slide catalog/provenance and demo metadata; consumes Vinesh's schema.
+- **Chaandan (R3):** additive QA/regression, bug evidence, rehearsal package, survey reminder.
+
+Vinesh provides a minimal core seed and canonical fixtures; Praneeth and Vinesh run their own tests. Core development does not wait for a complete catalog, finished QA suite, or support-role signoff. Real slides, successful hardware operation, and correctness checks remain necessary for release. If a support task becomes blocking, a core owner explicitly takes it over with a path handoff; do not silently skip it.
 
 ## Gates
 
-| Window | R1 | R2 | R3 | R4 | Exit evidence |
+| Window | Praneeth: heavy, on GX10 | Vinesh: heavy, core implementation | Nisheeth: bounded support | Chaandan: bounded support | Exit evidence |
 | --- | --- | --- | --- | --- | --- |
-| 0-2 h | Inventory GX10, start serving proof, establish branches/deps | Real crop and slide metadata, checkpoint proof | Amended schemas, fixtures, generated types | Extract UI shell, render real DeepZoom slide | Contract version agreed; exact hardware and real-model blockers recorded |
-| 2-6 h | Real local completion, coexistence probe | Real scored crop/nuclei with geometry fixture | Mock API-to-report lifecycle complete | Full UI flow on canonical fixtures | Mock integrated demo plus separate real-model evidence |
-| 6-10 h | Stable serving/runtime, early mixed-load bench | Real event stream and immutable shard publication | Consume real events/artifacts; queue acknowledgments | Real scores/nuclei and alignment checks | One real slide through viewer, evidence, and persistence |
-| 10-14 h | Telemetry and enforced offline topology | Scheduler, coverage/QC, counts and final regions | Real grounded report, fallback, edits/review | Regions/report links, resync and measured system panel | Real P0 path works as one deployment |
-| 14-18 h | Full P0 offline rehearsal | Resolve real pipeline issues; then P1 | Resolve correctness; then P1 contracts | Rehearse; then P1 experience | P0 offline pass unlocks P1/P2 according to original priority |
-| 18-21 h | Mixed-load soak and restart checks | Cancellation/recovery and edge crops | Ordering, evidence/fallback, multispecimen checks | End-to-end offline/reconnect coverage | Defects assigned and repaired; claims reconciled with measurements |
-| 21-24 h | Freeze tested release; cold boot and hardware logistics | Assist defect fixes and benchmark interpretation | Assist defect fixes and provenance review | Two rehearsals/backup capture; survey reminder | Reproducible judged demo; no unverified performance claims |
+| 0-2 h | Inventory GX10; local LLM proof; UI shell and viewer | Schemas, manifest schema, mock fixture; runnable real-crop probe | Inventory available slides and access | Draft regression/rehearsal matrix | Direct API/geometry agreement; real hardware blockers identified |
+| 2-6 h | Real vision probe while LLM resident; full fixture-backed UI flow | Mock API/evidence/report path; real crop adapters and geometry fixture | Hash/check files and populate catalog | Manual mock-flow checks | Mock integrated flow and separate real-model evidence |
+| 6-10 h | Display real scores/nuclei; validate transforms; Compose integration | Real event/artifact path; queue acknowledgments and persistence | Validate and hand off prepared catalog | Add independent regressions and reproducible bug reports | One real slide through viewer and persistent evidence |
+| 10-14 h | Telemetry, network restrictions, report UI and recovery | Real local LLM client, grounded reports, resync, final coverage | Complete provenance/edge-case fixture docs | Report/failure/reconnect checks | Complete real P0 deployment |
+| 14-18 h | Run P0 offline rehearsal; then P1 UI/runtime | Fix core defects; then P1 inference/API | Resolve catalog discrepancies | Assist rehearsal and collect observations | P0 offline pass unlocks P1/P2 under original priority |
+| 18-21 h | Mixed-load soak, cold-browser/boot tests | Ordering, geometry, evidence and restart fixes | Verify final release files/hashes | Execute additive regression; record remaining issues | Release candidate with measured claims |
+| 21-24 h | Freeze tested release; final hardware rehearsals/return logistics | Core fixes and final scientific/provenance review | Final data handoff | Script, backup capture, survey reminder | Reproducible demo and actual acceptance record |
 
-If a gate slips, preserve scope in the backlog and report the dependency. Team decides tradeoffs explicitly. Do not start unintegrated optional work while P0 remains broken. Merge small owner-reviewed changes throughout the day instead of waiting for a final bulk integration.
+Merge small working changes throughout the day. If a gate slips, report its concrete dependency and agree on sequencing; do not silently remove features. Praneeth controls GX10 restart and GPU test windows so Vinesh's probes, local coding sessions, and rehearsals do not disrupt each other.
 
-## Tests that matter
+## Core acceptance checks: never delegated away
 
-| Test | Producer / verifier | Pass condition |
+| Check | Accountable owner / partner | Pass condition |
 | --- | --- | --- |
-| Geometry fixture | R2 / R4 | Known level-0 points and polygons land on expected pixels across zoom, borders, and MPP axes |
-| Live artifact publication | R2 / R3 | API reads a closed shard while other superblocks run; no partially published file is visible |
-| Queue and recovery | R2+R3 / R1 | Accepted second job waits legitimately; restart/gap/cancel cannot produce false success |
-| Coverage rules | R3 / R2 | Zero regions, zero tissue, partial segmentation, small hotspots, and failed slides never produce unsupported negative findings |
-| Report grounding | R3 / R4 | Values, links, limitations, and status match frozen evidence; adversarial/invalid prose falls back visibly |
-| Snapshot/delta race | R3 / R4 | Reconnect and late snapshot never overwrite newer cells or mix analyses |
-| Stale viewport query | R4 / R3 | Delayed nuclei response from old viewport/slide is ignored |
-| Resource sharing | R1 / R2+R3 | Models coexist and measured latency/memory remain within the chosen release envelope |
-| Cold offline start | R1 / R4 | Empty browser cache, no runtime internet, no missing assets/weights; complete flow succeeds |
-| Human edits | R3 / R4 | Original machine draft retained; modified values are human-authored; signed revision is immutable |
-| Test profile | R1 / R3 | Contract/e2e mock tests do not require CUDA images, model health checks, or real weights |
-| Demo transparency | R4 / all | Synthetic mappings, cache hits, templates, partial coverage, and unsupported measurements are visible |
+| Geometry | Vinesh / Praneeth | Known level-0 points/polygons align across zoom, tile seams, edges, 20x/40x, and separate MPP axes |
+| Live artifacts | Vinesh | API reads closed shards while later superblocks compute; no partial publication |
+| Queue/recovery | Vinesh / Praneeth on GX10 | Accepted jobs wait correctly; lost events/restart/cancel cannot produce false success |
+| Coverage | Vinesh | Empty regions, no tissue, excluded hotspots, failures, partial segmentation, and multiple slides retain explicit evidence limits |
+| Grounded report | Vinesh / Praneeth | Frozen measurements/links/status/limitations agree; invalid or contradictory generation falls back visibly |
+| Browser state | Praneeth / Vinesh | Reconnect and late snapshots/viewport requests cannot overwrite newer results or mix analyses |
+| Human edits | Vinesh + Praneeth | Original draft retained; edited values are human-authored; signed revision immutable |
+| GPU coexistence | Praneeth / Vinesh | Real models coexist with recorded memory and mixed-load timings |
+| Cold offline start | Praneeth | No cached external browser assets or runtime downloads required; enforced egress policy and local flow verified |
+| Mock test profile | Praneeth + Vinesh | Core contract/UI tests do not require GPU containers, model health checks, or real weights |
+
+Chaandan adds independent observations/regression, and Nisheeth validates catalog/provenance. Their contributions do not replace core owner verification. A defect they uncover still needs resolution or explicit release assessment.
 
 ## Readiness is layered
 
-- Process health: process can answer a liveness check.
-- Component ready: required model loaded and warmed or service initialized.
-- Analysis complete: final counts, sequences, and artifacts reconcile; no unresolved failures.
-- Report-ready evidence: frozen usable evidence exists with explicit coverage/limitations.
-- Demo ready: end-to-end local flow and cold offline rehearsal pass on the actual GX10.
+1. Process healthy: can answer a liveness check.
+2. Component ready: required model warmed or service initialized.
+3. Analysis complete: final counts, sequences and artifacts reconcile.
+4. Report-ready evidence: frozen usable evidence exists with explicit coverage/limitations.
+5. Demo ready: end-to-end local flow and cold offline rehearsal pass on the actual GX10.
 
-Do not collapse these into a single optimistic green check.
+Do not collapse these into one optimistic green indicator. Do not label mock, cached, estimated, or unmeasured behavior as fresh real inference.
 
 ## Release record
 
-Fill with observations, not planned values:
+Praneeth and Vinesh complete technical evidence; Chaandan helps collect it. Fill with observations, not targets:
 
-- Tested repository commit:
-- Hardware model / OS / driver:
-- Image digests and checkpoint hashes:
-- Slide IDs/hashes and synthetic mapping disclosure:
-- Shared contract version:
+- Tested repository commit / contract version:
+- GX10 model / OS / driver / image digests:
+- Model/checkpoint/prompt hashes:
+- Slide hashes / real provenance / synthetic mapping disclosure:
 - Cold boot to ready:
-- Full-slide pass 1 / segmentation coverage / total:
-- Viewport-to-visible-result p50/p95 and sample count:
-- Report TTFT / validated draft time / token count:
-- Peak host memory / measurement method / swap baseline and change:
-- Mixed-load latency and temperature/power where supported:
-- Offline enforcement tests and cold-browser result:
-- Actual fallback exercised:
-- Remaining limitations and targets not achieved:
-- Feedback survey completed by / time:
-- Hardware return responsible person / deadline:
+- Pass 1 time / segmentation coverage / full analysis time:
+- Viewport latency p50/p95 and sample count:
+- Report TTFT / validated draft time / completion tokens:
+- Peak memory / accounting method / swap baseline and change:
+- Mixed-load latency / temperature / power where supported:
+- Network enforcement tests / cold-browser offline result:
+- Fallback and recovery cases actually exercised:
+- Remaining defects, limitations, untested or missed targets:
+- Feedback survey human owner / completion time (Chaandan reminds):
+- Hardware return responsible person / deadline (Praneeth):
 
-## Source and claim reminders
+## Event and claim reminders
 
-The supplied ASUS PDF requires GX10 local development/demo, hardware return, and survey completion. It provides four judging themes: meaningful problem, originality, value of local AI, and engaging utility. Demonstrate them through one understandable workflow, real local compute, measured behavior, and evidence the user can inspect.
+The supplied ASUS statement requires GX10 local development/demo, hardware return, and survey completion. Judging themes are meaningful problem, originality, value of local AI, and engaging utility. Demonstrate these with an understandable workflow, real local compute, measured behavior, and inspectable evidence.
 
-Do not repeat the PDF's general marketing language as a proven absolute privacy/security guarantee. Air-gap behavior, model validity, and performance are separate claims needing their own evidence. The optional public social-content challenge does not authorize publication by a coding assistant.
+Marketing language is not an absolute privacy/security guarantee. Isolation, scientific validity, and performance require separate evidence. Optional public social content does not authorize an assistant to publish or submit anything. Preserve the confidential source PDF outside the repository.

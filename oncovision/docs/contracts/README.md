@@ -1,8 +1,8 @@
 # OncoVision role contracts
 
-Version: 1.0 | Prepared: 2026-10-10 | Build window: 24 hours
+Version: 2.0 | Prepared: 2026-10-10 | Build window: 24 hours
 
-These are engineering delivery contracts for four people and their coding assistants. They are not legal agreements. Role numbers are assignments to fill in, not assumptions about team members' names. The existing OncoPulse application remains in QBIHack while OncoVision is developed in this repository.
+These are engineering delivery contracts for four people and their coding assistants. They are not legal agreements. Assignments reflect the updated team decision: Praneeth works directly on GX10 with Claude Code; Praneeth and Vinesh own the critical implementation, while Nisheeth and Chaandan have bounded support work. Version 2 replaces all version-1 role numbers and assignments. The existing OncoPulse application remains in QBIHack while OncoVision is developed in this repository.
 
 ## Read and distribute
 
@@ -13,10 +13,10 @@ These are engineering delivery contracts for four people and their coding assist
 
 | Role | Assignment | Contract |
 | --- | --- | --- |
-| R1 | Platform, LLM serving, integration lead: **unassigned** | [R1 contract](01-platform-llm-integration.md) |
-| R2 | Vision, slide data, artifact pipeline: **unassigned** | [R2 contract](02-vision-and-data.md) |
-| R3 | Backend, shared interfaces, grounded reports: **unassigned** | [R3 contract](03-backend-contracts-reports.md) |
-| R4 | Frontend, viewer, demo experience: **unassigned** | [R4 contract](04-frontend-viewer-demo.md) |
+| R1 | **Praneeth — frontend, GX10 runtime, local integration (heavy)** | [Praneeth contract](01-praneeth-frontend-gx10.md) |
+| R2 | **Nisheeth — slide preparation, provenance, demo data (bounded support)** | [Nisheeth contract](02-nisheeth-data-preparation.md) |
+| R3 | **Chaandan — QA scenarios, demo evidence, rehearsal support (bounded support)** | [Chaandan contract](03-chaandan-qa-demo.md) |
+| R4 | **Vinesh — backend, contracts, vision, grounded reports (heavy)** | [Vinesh contract](04-vinesh-backend-vision.md) |
 
 No implementation has been executed or benchmarked by this document pack. Paths below describe the proposed new application unless explicitly labeled as existing source. All acceptance boxes begin unchecked.
 
@@ -36,10 +36,18 @@ Keep source attribution when extracting helpers. Copy only the needed functions 
 
 ## Hardware and eligibility
 
-The supplied ASUS statement requires building and demonstrating locally on **ASUS Ascent GX10**, returning borrowed hardware before Closing Ceremony in its original condition, and completing the feedback survey before judging ends. A generic DGX Spark is not assumed to satisfy the ASUS-specific requirement; confirm the supplied machine with organizers if needed. R1 owns hardware readiness and return logistics; R4 owns the survey reminder and demo evidence. Submission actions remain human-owned unless explicitly delegated.
+The supplied ASUS statement requires building and demonstrating locally on **ASUS Ascent GX10**, returning borrowed hardware before Closing Ceremony in its original condition, and completing the feedback survey before judging ends. A generic DGX Spark is not assumed to satisfy the ASUS-specific requirement; confirm the supplied machine with organizers if needed. Praneeth owns GX10 readiness and hardware return logistics; Chaandan owns the survey reminder and demo evidence. Submission actions remain human-owned unless explicitly delegated.
 
 The statement says Nemotron 3.5 Lightning is preloaded. It does not explicitly require its use, all models resident simultaneously, an unplug performance, a particular latency, or use of every GB of RAM. Those are team design decisions. The social-content challenge is optional and separate from the core track. Do not publish the supplied PDF, whose pages are marked ASUS_Confidential.
 
-## Three-account arrangement
+## Coding accounts and work locations
 
-Account type remains unconfirmed. If these are Claude coding accounts, use separate sessions for R2, R3, and R4; R1 coordinates hardware and integrates, pairing with an account holder when coding assistance is needed. Use distinct branches/worktrees. Do not share credentials or assume one person's account authorizes another person's access. If these are cloud infrastructure accounts, use them only for permitted development preparation; the demonstrated runtime has no cloud dependency. Account count must not dictate runtime topology.
+Praneeth works directly on the GX10 with his installed Claude Code. His session owns GPU setup, model serving, the frontend, telemetry, deployment, and integrated hardware testing. Vinesh uses a separate checkout/session for backend and vision development; real GPU checks run through Praneeth's controlled GX10 integration checkout. Do not let two sessions mutate the same checkout or restart the shared runtime concurrently.
+
+If all three accounts are coding subscriptions, prioritize dedicated sessions for Praneeth and Vinesh. The third account holder can assist with a bounded Nisheeth or Chaandan task; this does not authorize sharing credentials. All four people use named branches/checkouts. No cloud infrastructure is required for the demo runtime.
+
+## Two-person critical path
+
+Praneeth and Vinesh agree on interfaces directly. Vinesh ships canonical mock fixtures and a minimal seed case without waiting for Nisheeth. Praneeth and Vinesh each own tests for their implementation without waiting for Chaandan. Nisheeth adds verified real-slide metadata and demo scenarios; Chaandan adds independent regression coverage and evidence. Support deliverables improve the release, but are not mandatory intermediaries for schema decisions, merges, or core development.
+
+Real slides, functioning models, and passing release checks are still required. If a support task becomes a release dependency, the responsible core owner explicitly takes it over in an isolated handoff; no prerequisite is silently skipped. Preserve P0/P1/P2 scope and the original offline-first feature gates.

@@ -7,15 +7,17 @@ Use this with a role contract and `00-shared-contract.md`. This is a task prompt
 Fill in the values before starting a coding session:
 
 - Assigned role: `R1 | R2 | R3 | R4`
-- Human owner: `<name>`
+- Human owner: `R1 Praneeth | R2 Nisheeth | R3 Chaandan | R4 Vinesh`
 - Repository checkout and branch/worktree: `<path and branch>`
 - Current gate: `<0-2 / 2-6 / 6-10 / 10-14 / 14-18 / 18-21 / 21-24 hours>`
 - Concrete deliverable: `<working behavior, not just files>`
 - Available hardware: `<GX10 / development laptop / other>`
-- Shared contract version: `1.0` or the coordinated successor
+- Shared contract version: `2.0` or the coordinated successor
 - Known delegated paths: `<none, or exact paths + owner authorization>`
 
-For the three-account setup, allocate one independent session each to R2, R3, and R4 if these are coding subscriptions. R1 remains human integration lead and can pair with an account holder. No credential sharing or new account/service creation is implied.
+Praneeth uses Claude Code directly on GX10 for R1; Vinesh uses his own checkout/session for R4. Prioritize dedicated coding sessions for these heavy roles. If a third coding account is available, its holder can assist with a bounded R2/R3 task without sharing credentials. Nisheeth and Chaandan can work independently on catalog preparation and QA. Neither owns a prerequisite schema, runtime service, or core acceptance gate.
+
+Before coding, verify the role mapping is version 2. R1 owns UI/GX10/runtime; R4 owns backend/vision/contracts. R2/R3 must not modify production code to resolve a blocker. R1/R4 provide minimal fixtures and their own tests, and coordinate directly. Only Praneeth schedules shared GX10 runtime changes and GPU tests. Real hardware results may not be substituted with laptop/mock success.
 
 ## Copyable task prompt
 
@@ -36,8 +38,8 @@ Working agreement:
 2. State your owned paths, the next deliverable, and any interface dependency.
    Work autonomously within those paths. Do not repeatedly seek confirmation
    for reversible implementation or verification already assigned to you.
-3. Do not edit another role's paths, shared schema, generated code by hand,
-   global lockfiles, or an old application unless explicitly delegated under
+3. Do not edit another role's paths, generated code by hand,
+   shared schemas or global lockfiles outside your ownership, or an old application unless explicitly delegated under
    the ownership contract. Reading and reviewing those paths is allowed.
 4. For a cross-owner defect, supply the failing example and a concrete proposed
    contract/patch. Request the owner handoff through the team's agreed channel.

@@ -1,6 +1,6 @@
 # Shared engineering contract
 
-Version 1.0. Applies to R1-R4 and every coding assistant. Application path root: `UCSC-AI-HACKATHON-V-P-N-C/oncovision/`.
+Version 2.0. Assignments: R1 Praneeth, R2 Nisheeth, R3 Chaandan, R4 Vinesh. Applies to R1-R4 and every coding assistant. Application path root: `UCSC-AI-HACKATHON-V-P-N-C/oncovision/`.
 
 ## Product and scope
 
@@ -10,35 +10,43 @@ This is a research workflow demonstration. Synthetic case/margin assignments mus
 
 ## Ownership registry
 
-A listed exception overrides its parent directory. Owners may edit their paths without repeated permission. Everyone may read other paths. Ownership prevents concurrent edits; it does not restrict review or require user approval for routine in-scope work.
+A listed exception overrides its parent directory. Owners may edit their paths without repeated permission. Everyone may read and review other paths. Ownership prevents concurrent edits; it does not require repeated user approval for assigned work. Role numbering changed in version 2; old role files are superseded.
 
 | Owner | Writable source paths |
 | --- | --- |
-| R1 | `compose*.yaml`, `services/llm/**`, `.env.example`, `Makefile`, root `pyproject.toml`, `uv.lock`, `.github/workflows/**`, `scripts/{preflight,bench,soak,netwatch,prefetch_models}.py`, `scripts/package_offline*`, `services/api/src/onco_api/telemetry/**`, `tests/hardware/**`, `docs/{contracts,decisions,runbooks}/**` |
-| R2 | `services/vision/**`, `prompts/conch_prompts_v1.yaml`, `scripts/prefetch_slides.py`, `tests/vision/**`, `fixtures/vision/**`, `data-manifests/slides.json` |
-| R3 | `packages/onco_common/**`, `services/api/**` **except telemetry**, `prompts/report_v1.md`, `scripts/{export_schemas,gen_types,seed_demo,gc_artifacts}.*`, `tests/{api,contracts,reports}/**`, `fixtures/{contracts,reports}/**` |
-| R4 | `web/**` **except generated API/schema output**, `tests/e2e/**`, `fixtures/demo/**`, `data-manifests/demo-case.json`, `docs/demo/**` |
-| R3-generated only | `web/src/api/generated/**`, `web/src/api/ws/schemas.generated.ts`, generated schema files under `build/` |
+| R1 Praneeth | `web/**` except generated output; `compose*.yaml`, `services/llm/**`, `.env.example`, `Makefile`, root `pyproject.toml`, `uv.lock`, application CI configuration; `scripts/{preflight,bench,soak,netwatch,prefetch_models}.py`, `scripts/package_offline*`; `services/api/src/onco_api/telemetry/**`; `tests/{hardware,frontend,e2e/core}/**`; `docs/{contracts,decisions,runbooks,demo/product}/**` |
+| R2 Nisheeth | `scripts/data_prep/**`, `tests/data_prep/**`, `data-manifests/{slides,demo-case}.json`, `fixtures/demo/catalog/**`, `docs/data/**` |
+| R3 Chaandan | `tests/e2e/regression/**`, `tests/qa/**`, `fixtures/qa/**`, `docs/qa/**`, `docs/demo/rehearsal/**` |
+| R4 Vinesh | `packages/onco_common/**`; `services/api/**` except telemetry; `services/vision/**`; `prompts/{report_v1.md,conch_prompts_v1.yaml}`; `scripts/{export_schemas,gen_types,seed_demo,gc_artifacts}.*`; `tests/{api,contracts,reports,vision}/**`; `fixtures/{contracts,reports,vision,demo/core}/**`; `data-manifests/schema/**` |
+| R4 generated only | `web/src/api/generated/**`, `web/src/api/ws/schemas.generated.ts`, generated schemas under `build/` |
 
-R4 owns frontend generator configuration such as `web/orval.config.ts`; coordinate any change with R3, who owns generation and committed generated output. R3 owns the API Dockerfile; R2 owns the vision Dockerfile; R1 owns their Compose wiring. R1 alone edits root dependency/CI files; owners provide requested dependency changes and evidence. R4 owns frontend dependency files and lockfile. R1 integrates shared runtime dependency resolution.
+Praneeth owns frontend package/lock files and generator configuration; Vinesh owns generation and committed generated output. Vinesh owns API and vision Dockerfiles and per-service dependency declarations; Praneeth owns Compose wiring and root dependency resolution. Vinesh supplies dependency requests; no one independently changes the shared root lockfile.
 
-Unlisted paths require assignment by R1 and the affected owner before editing. New module files under an owned directory do not need a separate assignment. Do not modify old application directories, generated output by hand, other worktrees, or another owner's uncommitted work.
+All paths above are relative to `oncovision/`. GitHub only loads Actions workflows from the repository-root `.github/workflows/`: Praneeth owns that external exception, narrowly for OncoVision CI. It must not change unrelated jobs. Commands in CI must use the correct application working directory.
+
+Vinesh defines the slide/demo-manifest schema and supplies a minimal core fixture. Nisheeth populates the catalog and validates it using that schema. Runtime boot cannot depend on executing Nisheeth's preparation scripts: it consumes prepared local files through Vinesh's loader. `scripts/seed_demo.py` accepts the catalog when available and an explicit labeled core fixture for development; it never quietly invents real evidence.
+
+Chaandan's tests are additive and runnable separately. Praneeth owns browser-test configuration and core e2e tests; Vinesh owns backend/vision test configuration. They keep testing their own work even if QA contributions are not ready. Tests that reveal real release defects must be resolved by the responsible core owner.
+
+Unlisted paths are assigned by Praneeth with the affected owner. New files within owned paths need no further assignment. Old QBIHack applications are read-only external sources. No hand edits to generated output, edits in another person's worktree, or overwriting uncommitted work.
 
 ## Cross-owner change protocol
 
-1. Describe the concrete interface defect and propose a versioned schema/sample payload or small patch.
-2. Name producer, consumers, migration implications, and required tests.
-3. The affected owner implements it, or explicitly delegates the named paths and duration. Record delegation in the change description.
-4. R3 owns shared schema changes. Update producer, generated clients, fixtures, and consumers together before integration. R1 checks the combined result.
-5. Continue independent work with an interface-faithful, visibly labeled fixture while waiting. Do not invent parallel DTOs, silently ignore new fields, or repeatedly ask the user to mediate ordinary team handoffs.
+1. Describe the defect and propose a minimal versioned schema/example or patch. Name producer, consumers, migration, and acceptance test.
+2. Vinesh owns contracts and backend/vision decisions; Praneeth owns UI/runtime integration. These two coordinate directly without waiting for support-role approval.
+3. The path owner implements the change or delegates named paths for a stated period. Record the handoff before editing, including any support task taken over by a core owner.
+4. Shared schema updates include producers, generated clients, fixtures, and consumers in the same coordinated integration change. Vinesh generates; Praneeth verifies UI/runtime compatibility.
+5. Nisheeth and Chaandan report blocked work with the concrete sample/error, then continue independent catalog/QA work. They do not invent replacement schemas or fix production code outside their boundaries.
 
-Use one branch/worktree per role. Merge small working changes at each gate. No force-pushes, broad cleanups, unrelated formatting, or history rewriting as part of this assignment. No new dependency, transport, database, or architectural layer without a concrete need and owner coordination.
+Use one branch/worktree per person. Praneeth controls the GX10 integration checkout and restart/benchmark schedule. Vinesh can provide scripts and PRs for hardware checks; direct GX10 edits require an isolated checkout and agreed test window. No concurrent inference benchmarks, driver changes, or model-server restarts from competing sessions. Development fixtures unblock laptops; only real hardware evidence satisfies hardware gates.
+
+No force pushes, broad cleanups, unrelated formatting, or unrequested history rewriting. Support-role review is useful but never a required approval gate for core work. Existing repository protection and CI rules still apply. Scope remains unchanged; this version redistributes ownership rather than deleting deliverables.
 
 ## Runtime boundaries
 
 - `api` alone writes SQLite; one API process owns the writer. Frontend, vision, and LLM never write it.
 - `vision` alone writes analysis artifacts. API reads only published artifacts and validates paths under the artifact root.
-- `llm` serves the local model. R3 owns client behavior, report prompt, validation, and rendering.
+- `llm` serves the local model. Vinesh owns client behavior, report prompt, validation, and rendering.
 - Browser speaks to API only. It never contacts model containers or a remote inference service.
 - CPU-bound reads/encoding/hash work runs in bounded workers, not on the event loop. Queues, caches, concurrency, and buffers have explicit bounds.
 - Register and supervise tasks. Use timeouts and cleanup for all external waits. Avoid per-request model loading, clients, process pools, and full-slide decoding.
@@ -46,7 +54,7 @@ Use one branch/worktree per role. Merge small working changes at each gate. No f
 
 ## Minimum shared interface contract
 
-R3 translates this contract into versioned frozen Pydantic models and generated TypeScript validators at the first gate. Examples and tests are delivered alongside the models. The baseline spec remains the detailed route reference, with the amendments below.
+Vinesh translates this contract into versioned frozen Pydantic models and generated TypeScript validators at the first gate. Examples and tests are delivered alongside the models. The baseline spec remains the detailed route reference, with the amendments below.
 
 | Boundary | Required semantics |
 | --- | --- |
@@ -61,7 +69,7 @@ R3 translates this contract into versioned frozen Pydantic models and generated 
 | Findings | Frozen analysis IDs, final region references, model/prompt/config hashes, measured values with units, coverage, limitations, quality, thresholds, and provenance. |
 | Telemetry | Value, unit, source, sample time, availability; no synthetic performance figures. Expose stale samples. |
 
-For reliable results, R3/R2 implement acknowledgments/replay or detect gaps and fail the affected analysis explicitly. A larger sequence number alone is not proof no results were lost. Prevent terminal transitions from incomplete/gapped streams. Viewport/throttle updates may coalesce; scientific results may not silently disappear. Worker command handling and heartbeats must remain responsive during inference.
+For reliable results, Vinesh implements acknowledgments/replay or detect gaps and fail the affected analysis explicitly. A larger sequence number alone is not proof no results were lost. Prevent terminal transitions from incomplete/gapped streams. Viewport/throttle updates may coalesce; scientific results may not silently disappear. Worker command handling and heartbeats must remain responsive during inference.
 
 ## Amendments to the original design
 
