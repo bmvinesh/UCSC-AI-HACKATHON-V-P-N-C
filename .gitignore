@@ -1,0 +1,23 @@
+# Credentials and local environments
+.env
+.env.*
+!.env.example
+.venv/
+node_modules/
+__pycache__/
+*.py[cod]
+# Private/large preparation and runtime outputs
+data/raw/
+data/private/
+runtime/
+artifacts/checkpoints/
+*.sqlite*
+*.pt
+*.pth
+*.safetensors
+*.gguf
+# Builds and local logs
+web/dist/
+*.log
+.DS_Store
+# Small audited public ONNX/scaler/model-card files will be explicitly staged

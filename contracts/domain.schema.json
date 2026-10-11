@@ -1,0 +1,721 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:oncogrowth:domain:1",
+  "title": "OncoGrowth domain v1",
+  "$comment": "Cross-field scientific/job invariants in docs/CONTRACTS.md require semantic validators in addition to this schema.",
+  "$defs": {
+    "Problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "INVALID_INPUT",
+            "NOT_FOUND",
+            "QUEUE_FULL",
+            "MODEL_UNAVAILABLE",
+            "OUT_OF_DOMAIN",
+            "DEPENDENCY_TIMEOUT",
+            "INTERRUPTED",
+            "INTERNAL"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "retryable",
+        "trace_id"
+      ]
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataset_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measurement_method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "regimen_verified": {
+          "type": "boolean"
+        },
+        "synthetic": {
+          "type": "boolean"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "source_ref",
+        "dataset_version",
+        "measurement_method",
+        "regimen_verified",
+        "synthetic",
+        "limitations"
+      ]
+    },
+    "Observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "type": "number",
+          "minimum": 0
+        },
+        "volume_cm3": {
+          "type": "number",
+          "minimum": 0
+        },
+        "measurement": {
+          "type": "string",
+          "enum": [
+            "ftv",
+            "mask_volume",
+            "synthetic"
+          ]
+        },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "baseline",
+            "early_paclitaxel"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "day",
+        "volume_cm3",
+        "measurement",
+        "phase",
+        "source_ref"
+      ]
+    },
+    "CaseRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cancer": {
+          "const": "breast"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "ispy2",
+            "synthetic"
+          ]
+        },
+        "patient_group_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_volume_cm3": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "subtype": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Observation"
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "eligible_paclitaxel": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "cancer",
+        "source",
+        "patient_group_id",
+        "baseline_volume_cm3",
+        "subtype",
+        "observations",
+        "provenance",
+        "eligible_paclitaxel"
+      ]
+    },
+    "ScenarioRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "const": 1
+        },
+        "case_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "engine": {
+          "type": "string",
+          "enum": [
+            "empirical",
+            "mechanistic"
+          ]
+        },
+        "horizon_days": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 84
+        },
+        "intervention": {
+          "type": "string",
+          "enum": [
+            "paclitaxel",
+            "none"
+          ]
+        },
+        "sensitivity_scale": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "contract_version",
+        "case_id",
+        "engine",
+        "horizon_days",
+        "intervention",
+        "sensitivity_scale",
+        "model_version",
+        "seed"
+      ]
+    },
+    "CurvePoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "type": "number",
+          "minimum": 0
+        },
+        "volume_cm3": {
+          "type": "number",
+          "minimum": 0
+        },
+        "lower_cm3": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "upper_cm3": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "day",
+        "volume_cm3",
+        "lower_cm3",
+        "upper_cm3"
+      ]
+    },
+    "Curve": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "string",
+          "enum": [
+            "observed",
+            "forecast",
+            "illustrative"
+          ]
+        },
+        "band_kind": {
+          "type": "string",
+          "enum": [
+            "none",
+            "sensitivity",
+            "empirical_interval"
+          ]
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CurvePoint"
+          }
+        }
+      },
+      "required": [
+        "label",
+        "evidence",
+        "band_kind",
+        "points"
+      ]
+    },
+    "ScenarioResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "request": {
+          "$ref": "#/$defs/ScenarioRequest"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "trained_model",
+            "conditional_calibration",
+            "mechanistic",
+            "cached",
+            "synthetic"
+          ]
+        },
+        "origin_source": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "trained_model",
+                "conditional_calibration",
+                "mechanistic",
+                "synthetic"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "curves": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Curve"
+          }
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "request",
+        "source",
+        "origin_source",
+        "curves",
+        "model_version",
+        "assumptions",
+        "warnings",
+        "provenance",
+        "created_at"
+      ]
+    },
+    "JobRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "scenario",
+            "explanation"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "progress": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "result_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Problem"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "state",
+        "progress",
+        "result_id",
+        "error",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "ExplanationRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "result_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "result_id",
+        "question"
+      ]
+    },
+    "ExplanationResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "result_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "qwen",
+            "cached_qwen",
+            "template"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "referenced_fields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "id",
+        "result_id",
+        "source",
+        "text",
+        "referenced_fields",
+        "model_id",
+        "warnings"
+      ]
+    },
+    "Capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "profile": {
+          "type": "string",
+          "enum": [
+            "local",
+            "pages"
+          ]
+        },
+        "empirical_available": {
+          "type": "boolean"
+        },
+        "mechanistic_available": {
+          "type": "boolean"
+        },
+        "chat_available": {
+          "type": "boolean"
+        },
+        "model_version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "degraded",
+            "starting"
+          ]
+        }
+      },
+      "required": [
+        "profile",
+        "empirical_available",
+        "mechanistic_available",
+        "chat_available",
+        "model_version",
+        "status"
+      ]
+    },
+    "ModelManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "const": 1
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "artifact_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_names": {
+          "const": [
+            "features"
+          ]
+        },
+        "feature_order": {
+          "const": [
+            "log_baseline_ftv_cm3",
+            "elapsed_days"
+          ]
+        },
+        "feature_count": {
+          "const": 2
+        },
+        "output_name": {
+          "const": "log_volume_ratio"
+        },
+        "dtype": {
+          "const": "float32"
+        },
+        "feature_transform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validated_horizon_days": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "cancer": {
+          "const": "breast"
+        },
+        "intervention": {
+          "const": "paclitaxel"
+        },
+        "trained_on": {
+          "type": "string",
+          "enum": [
+            "real",
+            "synthetic"
+          ]
+        },
+        "band_kind": {
+          "type": "string",
+          "enum": [
+            "none",
+            "sensitivity",
+            "empirical_interval"
+          ]
+        },
+        "parity_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "train_patients": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "validation_patients": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "test_patients": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "contract_version",
+        "model_version",
+        "sha256",
+        "artifact_path",
+        "input_names",
+        "feature_order",
+        "feature_count",
+        "output_name",
+        "dtype",
+        "feature_transform",
+        "validated_horizon_days",
+        "cancer",
+        "intervention",
+        "trained_on",
+        "band_kind",
+        "parity_tolerance",
+        "train_patients",
+        "validation_patients",
+        "test_patients",
+        "limits"
+      ]
+    }
+  }
+}

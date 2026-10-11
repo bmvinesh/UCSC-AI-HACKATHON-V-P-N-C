@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:oncogrowth:preprocessing:1",
+  "title": "OncoGrowth preprocessing v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "feature_order": {
+      "const": [
+        "log_baseline_ftv_cm3",
+        "elapsed_days"
+      ]
+    },
+    "means": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "number"
+      }
+    },
+    "stds": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      }
+    },
+    "volume_epsilon_cm3": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "transform": {
+      "const": "log_baseline_then_standardize"
+    },
+    "missing_policy": {
+      "const": "reject"
+    },
+    "output_inverse": {
+      "const": "exp_ratio"
+    },
+    "source_volume_unit": {
+      "const": "cm3"
+    }
+  },
+  "required": [
+    "schema_version",
+    "feature_order",
+    "means",
+    "stds",
+    "volume_epsilon_cm3",
+    "transform",
+    "missing_policy",
+    "output_inverse",
+    "source_volume_unit"
+  ]
+}

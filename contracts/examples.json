@@ -1,0 +1,167 @@
+{
+  "_notice": "All examples are synthetic interface fixtures; no actual model exists or has trained.",
+  "CaseRecord": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "label": "Synthetic interface case",
+    "cancer": "breast",
+    "source": "synthetic",
+    "patient_group_id": "synthetic-group-1",
+    "baseline_volume_cm3": 10,
+    "subtype": null,
+    "observations": [
+      {
+        "day": 0,
+        "volume_cm3": 10,
+        "measurement": "synthetic",
+        "phase": "baseline",
+        "source_ref": "synthetic-fixture"
+      }
+    ],
+    "provenance": {
+      "source_ref": "synthetic-contract-fixture",
+      "dataset_version": "fixture-v1",
+      "measurement_method": "synthetic-volume",
+      "regimen_verified": false,
+      "synthetic": true,
+      "limitations": [
+        "Interface example only; not patient data or training evidence."
+      ]
+    },
+    "eligible_paclitaxel": false
+  },
+  "ScenarioRequest": {
+    "contract_version": 1,
+    "case_id": "00000000-0000-4000-8000-000000000001",
+    "engine": "mechanistic",
+    "horizon_days": 21,
+    "intervention": "paclitaxel",
+    "sensitivity_scale": 1,
+    "model_version": "synthetic-fixture-v1",
+    "seed": 7
+  },
+  "ScenarioResult": {
+    "id": "00000000-0000-4000-8000-000000000002",
+    "request": {
+      "contract_version": 1,
+      "case_id": "00000000-0000-4000-8000-000000000001",
+      "engine": "mechanistic",
+      "horizon_days": 21,
+      "intervention": "paclitaxel",
+      "sensitivity_scale": 1,
+      "model_version": "synthetic-fixture-v1",
+      "seed": 7
+    },
+    "source": "synthetic",
+    "origin_source": null,
+    "curves": [
+      {
+        "label": "Illustrative fixture",
+        "evidence": "illustrative",
+        "band_kind": "none",
+        "points": [
+          {
+            "day": 0,
+            "volume_cm3": 10,
+            "lower_cm3": null,
+            "upper_cm3": null
+          },
+          {
+            "day": 21,
+            "volume_cm3": 8,
+            "lower_cm3": null,
+            "upper_cm3": null
+          }
+        ]
+      }
+    ],
+    "model_version": "synthetic-fixture-v1",
+    "assumptions": [
+      "Illustrative points chosen to test rendering, not computed by a trained model."
+    ],
+    "warnings": [
+      "Synthetic fixture"
+    ],
+    "provenance": {
+      "source_ref": "synthetic-contract-fixture",
+      "dataset_version": "fixture-v1",
+      "measurement_method": "synthetic-volume",
+      "regimen_verified": false,
+      "synthetic": true,
+      "limitations": [
+        "Interface example only; not patient data or training evidence."
+      ]
+    },
+    "created_at": "2026-10-10T23:00:00Z"
+  },
+  "JobRecord": {
+    "id": "00000000-0000-4000-8000-000000000003",
+    "kind": "scenario",
+    "state": "succeeded",
+    "progress": 1,
+    "result_id": "00000000-0000-4000-8000-000000000002",
+    "error": null,
+    "created_at": "2026-10-10T23:00:00Z",
+    "updated_at": "2026-10-10T23:00:00Z"
+  },
+  "ExplanationRequest": {
+    "result_id": "00000000-0000-4000-8000-000000000002",
+    "question": "Explain the assumptions."
+  },
+  "ExplanationResult": {
+    "id": "00000000-0000-4000-8000-000000000004",
+    "result_id": "00000000-0000-4000-8000-000000000002",
+    "source": "template",
+    "text": "This illustrative scenario uses synthetic fixture points and cannot establish treatment efficacy.",
+    "referenced_fields": [
+      "assumptions",
+      "provenance"
+    ],
+    "model_id": null,
+    "warnings": [
+      "Template, no Qwen call performed."
+    ]
+  },
+  "Capabilities": {
+    "profile": "pages",
+    "empirical_available": false,
+    "mechanistic_available": true,
+    "chat_available": false,
+    "model_version": null,
+    "status": "degraded"
+  },
+  "Problem": {
+    "code": "MODEL_UNAVAILABLE",
+    "message": "Trained model artifact is not available.",
+    "retryable": false,
+    "trace_id": "fixture-trace"
+  },
+  "ModelManifest": {
+    "contract_version": 1,
+    "model_version": "synthetic-fixture-v1",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "artifact_path": "fixture-only.onnx",
+    "input_names": [
+      "features"
+    ],
+    "feature_order": [
+      "log_baseline_ftv_cm3",
+      "elapsed_days"
+    ],
+    "feature_count": 2,
+    "output_name": "log_volume_ratio",
+    "dtype": "float32",
+    "feature_transform": "fixture-only-preprocessing.json",
+    "validated_horizon_days": 21,
+    "cancer": "breast",
+    "intervention": "paclitaxel",
+    "trained_on": "synthetic",
+    "band_kind": "none",
+    "parity_tolerance": 0.0001,
+    "train_patients": 0,
+    "validation_patients": 0,
+    "test_patients": 0,
+    "limits": [
+      "No model file exists; zero hash is only a placeholder, never release-valid."
+    ]
+  }
+}
