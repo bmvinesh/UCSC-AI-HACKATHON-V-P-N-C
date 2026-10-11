@@ -115,10 +115,10 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | E1 | Python and CUDA environment on the GX10, proposed pins | Deliver 1, 5 | H0 to H2 | none | done |
 | M1 | Model and runtime assets: verify what is installed, fetch only what is missing | Deliver 1 | H0 to H2 | G1, Q9 | done |
 | M2 | Dataset fetch with checksums | Deliver 5 | H1 to H4 | D10 | blocked |
-| M3 | Training run harness, then the runs | Deliver 5 | H2 to H12 | E1, M2, D11 | active |
+| M3 | Training run harness, then the runs | Deliver 5 | H2 to H12 | E1, M2, D11 | blocked |
 | M4 | Export run and on-device parity run | Deliver 5 | H8 to H18 | M3, D3 | todo |
 | C1 | Hour 1 freeze: agree DTO and engine semantics, resolve section 8 | Deliver 3 | H0.25 to H1 | all owners | todo |
-| F1 | React, Vite, TypeScript, Tailwind scaffold, versions pinned on aarch64 | Deliver 2 | H1 to H2 | none | todo |
+| F1 | React, Vite, TypeScript, Tailwind scaffold, versions pinned on aarch64 | Deliver 2 | H1 to H2 | none | active |
 | F2 | `DomainEngine` interface and fixture-backed engine | Deliver 3 | H1 to H4 | D1, Q7 | todo |
 | F5 | `BrowserEngine`: release index, two ONNX sessions in a worker, DTO assembly, parity. My first slice after the freeze, per the redesign | Deliver 3 | H2 to H12 | D3, Q11 | todo |
 | F6 | Template renderer, and explanation states for local and Pages | Deliver 4 | H4 to H12 | F2, D3 | todo |
@@ -180,6 +180,8 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 - Done when: a baseline run and an MLP run each have a complete record, the same seed reproduces the same metrics file, and the records and checkpoints are handed to Vinesh. A failed or interrupted run is recorded as failed.
 - Not mine: reading the metrics as good or bad, or choosing the model.
 - Verify: harness tests with a dummy command (success, failure, interrupt, second run refused); then the real runs.
+- Status 2026-10-11: the harness is built and tested. The training runs wait for Vinesh's entrypoints (D11) and the dataset (M2, D10), so the slice is `blocked`, not `done`.
+- Usage: `scripts/gx10/run.sh --seed 7 --out artifacts/checkpoints/model.pt train-mlp -- python -m modeling.train ...`. The record lands in `runtime/gx10/runs/<utc>-<label>/record.json`.
 
 ### M4 Export run and on-device parity
 
@@ -369,3 +371,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-11 | G1 | this commit | `scripts/gx10/inventory.sh` run twice gave identical output. `--completion` returned the expected reply cold and warm; timings and memory are in the G1 notes. No process was restarted. Output searched for token-like strings: none. Also fixed the Claude Code edit hook to resolve the repository from the working directory. | Raw output is in the ignored `runtime/gx10/`. |
 | 2026-10-11 | E1 | this commit | `setup_env.sh` built `.venv/`; `probe_env.py` printed `result: PASS` twice from separate shells; the pinned requirements file resolves with a pip dry run. Versions and timings are in the E1 notes. | Pins go to Chaandan as request D12. |
 | 2026-10-11 | M1 | this commit | `models.sh status` exits 0 with `ok qwen3.6:35b`. Against a temporary lock with a wrong digest and an absent model it printed `mismatch` and `missing` and exited 1. `fetch` with nothing missing pulled nothing. The `ollama serve` process ID stayed 2142. | No model download was needed. M2 is blocked on Vinesh's source list (D10). |
+| 2026-10-11 | M3 | this commit | `tests/hardware/run_harness_test.sh`: 17 checks passed (success, failure, missing output, record present while running, second run refused, interrupt, bad label, dirty tree refused). | Harness only. No training has been run. Blocked on D10 and D11. |
