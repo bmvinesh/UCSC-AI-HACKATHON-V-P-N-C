@@ -7,8 +7,8 @@ Own coherent releases, contract generation and the public static delivery. Writa
 1. Run the Hour 1 contract freeze with all owners: fields/units/jobs/semantics/example payloads. Generate clients and validation checks; no hand-editing outputs.
 2. Establish clean named branches/worktrees, CI validation/lint/type/build tasks, dependencies pinned after GX10 compatibility proof, and micro-commit merge gates. Preserve previous tested release.
 3. Build schema-valid synthetic seed cases/jobs/results with visible provenance. Ensure API/UI tests have a minimal fixture immediately, not an unavailable external-data dependency.
-4. Implement the Pages build/export/deploy workflow with hash routing/repository base path and bundled ONNX/WASM/preprocessing assets. Coordinate Vite changes with Praneeth. Publish only small permitted artifacts; no secret env values, raw MRI or Qwen weights.
-5. Enforce model-manifest/scaler/checksum/parity checks before export. Static site has no Python backend or remote chat dependency; browser model must actually run new inputs.
+4. Implement the Pages build/export/deploy workflow with hash routing/repository base path and the files listed in the release index (both ONNX artifact sets, catalogs, templates) plus the WASM assets. Coordinate Vite changes with Praneeth. Publish only small permitted artifacts; no secret env values, raw MRI or Qwen weights.
+5. Own `artifacts/public/release-index.json` and the synthetic case catalog. Before export, gate on index hashes and on running (not reimplementing) Vinesh's Python parity test and Praneeth's browser parity test. Static site has no Python backend or remote chat dependency; browser model must actually run new inputs.
 6. Integrate targeted owner-reviewed slices; resolve conflicts at source schema then regenerate. Run local/public smoke scripts and failure paths with core owners.
 7. Prepare judge overview, three-minute runbook, backup capture, survey reminder and final release record. Coordinate GX10 runs with Praneeth and data/model evidence with Vinesh.
 

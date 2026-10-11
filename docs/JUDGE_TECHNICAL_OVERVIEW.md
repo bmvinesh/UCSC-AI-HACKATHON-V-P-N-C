@@ -8,7 +8,7 @@ Why breast: serial MRI/measurement resources provide a practical larger data sta
 
 ## How the numerical model works
 
-The empirical model takes verified baseline features and elapsed time and predicts the log change in functional tumor volume. Positive values indicate expansion; negative values indicate reduction. It is fitted and evaluated using patient-disjoint groups. All transforms are saved with the model; observed volumes are shown beside forecasts. We compare against simple baselines and report actual held-out errors and sample counts.
+The empirical model takes verified baseline features and elapsed time and predicts the log change in functional tumor volume. Positive values indicate expansion; negative values indicate reduction. It is fitted and evaluated using patient-disjoint groups. All transforms are inside the exported graph, so the browser and the local app run identical computation; observed volumes are shown beside forecasts. We compare against simple baselines and report actual held-out errors and sample counts.
 
 The mechanistic engine follows:
 
@@ -18,13 +18,13 @@ The on/off comparison depends on disclosed growth/drug assumptions. Treated meas
 
 ## What the GX10 contributes
 
-The ASUS Ascent GX10 runs CUDA training/calibration and batched parameter/3D simulations locally. The installed Qwen 3.8 27B explains stored results without sending case data to a remote LLM. A single application coordinates jobs with SQLite-backed state and bounded executors. The UI stays responsive while heavy computations run asynchronously.
+The ASUS Ascent GX10 runs model training (on whichever device measures faster) and batched CUDA parameter/3D simulations locally. The installed Qwen 3.8 27B explains stored results without sending case data to a remote LLM. A single application coordinates jobs with SQLite-backed state and bounded executors. The UI stays responsive while heavy computations run asynchronously.
 
 We measure actual GPU/CPU timings, workload shapes, memory behavior and Qwen latency. Small tabular training may not be faster on GPU; our hardware demonstration focuses on representative ensemble simulations and local language inference. We do not claim theoretical FLOPs or fill memory for show.
 
 ## What runs on GitHub Pages
 
-Pages hosts the React UI, small exported ONNX growth model, preprocessing manifest, charts and allowed demo data. Browser WASM inference runs new inputs through the exported trained model, with parity checks against Python outputs. Training and CUDA simulation remain local; optional static scenarios carry cached provenance.
+Pages hosts the React UI, the two small exported ONNX graphs (empirical forecast and closed-form what-if simulator), charts and allowed demo data. Browser WASM inference runs new inputs through the same graphs the local app uses, with parity checks against Python outputs. Training and the 3D CUDA simulation remain local; optional static scenarios carry cached provenance.
 
 Qwen chat is a **local GX10 feature**. Pages shows deterministic explanations of current results and marks local chat unavailable. It does not contain Qwen weights, a secret token, a remote inference backend, or a connection to a visitor's localhost. GitHub Pages is static hosting; this split is how the public numerical demo remains usable without a server.
 

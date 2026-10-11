@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:oncogrowth:explanation-templates:1",
+  "title": "Explanation templates v1 (C13: rendered identically by Python and the browser)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "templates_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "number_format": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "volume_cm3_decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "ratio_decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        }
+      },
+      "required": [
+        "volume_cm3_decimals",
+        "ratio_decimals"
+      ]
+    },
+    "templates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "when_source": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "enum": [
+                "trained_model",
+                "conditional_calibration",
+                "mechanistic",
+                "cached",
+                "synthetic"
+              ]
+            }
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Placeholders are {dotted.field.path} into ScenarioResult; no logic."
+          },
+          "referenced_fields": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "id",
+          "when_source",
+          "text",
+          "referenced_fields"
+        ]
+      }
+    }
+  },
+  "required": [
+    "templates_version",
+    "number_format",
+    "templates"
+  ]
+}
