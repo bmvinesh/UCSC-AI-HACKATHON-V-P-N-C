@@ -41,10 +41,16 @@ DENIED_TYPE = "denied-type"  # Secrets, weights, raw data, databases.
 FORBIDDEN = "forbidden"  # Another owner's path or an unassigned path.
 
 OWNED_FILES = frozenset(
-    p.casefold() for p in ("README.md", ".gitignore", ".env.example", "pyproject.toml", "uv.lock", "Makefile")
+    p.casefold()
+    for p in (
+        "README.md", ".gitignore", ".env.example", "pyproject.toml", "uv.lock", "Makefile",
+        "artifacts/public/release-index.json",
+    )
 )
 OWNED_PREFIXES = ("docs/", ".github/workflows/", "tests/contracts/", "tests/e2e/")
 OWNED_SCRIPT_STEMS = frozenset({"generate_contracts", "seed_demo", "export_site", "smoke"})
+# Synthetic case catalogs only; real catalogs and every other artifacts/public/** file are Vinesh's.
+OWNED_ARTIFACT_RE = re.compile(r"^artifacts/public/cases/synthetic-[^/]+\.json$")
 JOINT_FILES = frozenset(
     p.casefold()
     for p in (
@@ -55,7 +61,8 @@ JOINT_FILES = frozenset(
         "docs/MASTER_IMPLEMENTATION_PLAN.md",
     )
 )
-JOINT_PREFIXES = ("contracts/", "docs/roles/")
+# docs/proposals/ holds teammates' accepted design records (boundary redesign, C-numbers).
+JOINT_PREFIXES = ("contracts/", "docs/roles/", "docs/proposals/")
 GUARD_FILES = frozenset(p.casefold() for p in (GUARD_PATH, LOCAL_SETTINGS))
 GENERATED_PREFIXES = ("app/generated/", "web/src/generated/")
 MY_TIERS = (OWNED, JOINT, GUARD, GENERATED)
@@ -93,6 +100,7 @@ NORMATIVE_PATHS = (
     "docs/DEMO_RUNBOOK.md",
     "docs/GIT_AND_AGENT_WORKFLOW.md",
     "docs/MASTER_IMPLEMENTATION_PLAN.md",
+    "docs/proposals",
     "docs/roles",
 )
 FINGERPRINT_RE = re.compile(r"Contract fingerprint: `([0-9a-f]{12})`")
@@ -123,7 +131,8 @@ def classify(rel_path: str) -> str:
         return GENERATED
     if path in JOINT_FILES or path.startswith(JOINT_PREFIXES):
         return JOINT
-    if path in OWNED_FILES or path.startswith(OWNED_PREFIXES) or _is_owned_script(path):
+    if (path in OWNED_FILES or path.startswith(OWNED_PREFIXES) or _is_owned_script(path)
+            or OWNED_ARTIFACT_RE.match(path)):
         return OWNED
     return FORBIDDEN
 
