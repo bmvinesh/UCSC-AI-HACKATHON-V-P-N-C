@@ -127,6 +127,7 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | T1 | `app/telemetry`: timings, memory, source attribution | Deliver 5 | H12 to H18 | D5 | done (module); measurements are G2 |
 | G2 | On-device integration and measurements | Deliver 5 | H12 to H20 | D4, D6 | todo |
 | F7 | Resilience, accessibility, provenance, export | Deliver 6 | H18 to H24 | F4, F5, Q6 | todo |
+| H1 | Handoff file for Vinesh listing what blocks the GX10 and the frontend | Workflow | now | none | active |
 | R1 | Pages base path, hash routing, local build, offline local start | Deliver 6 | H12 to T-3h | D3, D4, D7 | blocked; my part verified |
 
 Verify commands marked (F1) are npm scripts that F1 creates. They do not exist yet.
@@ -404,3 +405,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-11 | F5 | this commit | `npm --prefix web run check` exit 0 with 107 tests. Browser-engine tests: a full release loads clean; only listed files are requested; a tampered model disables one engine with a reason; the contract's example index degrades instead of failing; a bad index is a retryable Problem; both tensor layouts carry raw values; the source table for both engines; NaN, negative and short outputs fail the job; a worker failure; cancel during a run; six admission rejections; the template explanation. | No ONNX graph has been run in a browser. The worker and parity are not built. Slice blocked on D3. |
 | 2026-10-11 | T1 | this commit | `.venv/bin/python -m unittest discover -s tests/hardware -p 'test_*.py'`: 8 tests OK. One real reading on the GX10 through the module: a 2048 float32 matmul on CUDA, cold 0.153 s, warm median 0.0013 s, synchronized; host memory and this process's CUDA memory all measured. | The module is not wired to anything. No app or model was measured. |
 | 2026-10-11 | R1 | this commit | Pages build served under the repository sub-path: deep link and reload work, 3 same-origin static requests, clean console. | No slice is active. Everything left waits on D1, D3, D4, D6, D7, D10 or D11. Sixteen commits on `dev/praneeth-ui-gx10` are unpushed: the token on this machine still gets HTTP 403. |
+| 2026-10-11 | H1 | this commit | `scripts/gx10/HANDOFF_TO_VINESH.md` written at Praneeth's request. Every state it reports is taken from the rows above. | It reaches Vinesh only once the branch is pushed. |
