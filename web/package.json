@@ -14,7 +14,8 @@
     "predev": "npm run contracts",
     "pretypecheck": "npm run contracts",
     "pretest": "npm run contracts",
-    "prebuild": "npm run contracts"
+    "prebuild": "npm run contracts",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
     "ajv": "8.20.0",

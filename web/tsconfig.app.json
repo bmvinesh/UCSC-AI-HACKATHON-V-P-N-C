@@ -8,6 +8,8 @@
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    // tests/frontend sits outside this package, so its imports resolve here.
+    "paths": { "vitest": ["./node_modules/vitest"] },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
