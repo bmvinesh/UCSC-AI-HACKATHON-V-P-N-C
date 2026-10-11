@@ -42,7 +42,9 @@
             "minItems": 1,
             "items": {
               "$ref": "urn:oncogrowth:domain:1#/$defs/Curve"
-            }
+            },
+            "maxItems": 1,
+            "description": "Exactly one curve, for the requested intervention; a drug-on vs drug-off comparison is two requests (C31)."
           }
         },
         "required": [

@@ -361,7 +361,10 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/Curve"
-          }
+          },
+          "minItems": 1,
+          "maxItems": 1,
+          "description": "Exactly one curve, for the requested intervention; a drug-on vs drug-off comparison is two requests (C31)."
         },
         "model_version": {
           "type": "string",

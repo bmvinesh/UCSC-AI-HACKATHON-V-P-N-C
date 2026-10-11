@@ -33,10 +33,10 @@
     "contract_version": 1,
     "case_id": "00000000-0000-4000-8000-000000000001",
     "engine": "mechanistic",
-    "horizon_days": 21,
+    "horizon_days": 3,
     "intervention": "paclitaxel",
     "sensitivity_scale": 1,
-    "model_version": "synthetic-fixture-v1",
+    "model_version": "mech-fixture-v1",
     "seed": 7
   },
   "ScenarioResult": {
@@ -45,38 +45,50 @@
       "contract_version": 1,
       "case_id": "00000000-0000-4000-8000-000000000001",
       "engine": "mechanistic",
-      "horizon_days": 21,
+      "horizon_days": 3,
       "intervention": "paclitaxel",
       "sensitivity_scale": 1,
-      "model_version": "synthetic-fixture-v1",
+      "model_version": "mech-fixture-v1",
       "seed": 7
     },
-    "source": "synthetic",
+    "source": "mechanistic",
     "origin_source": null,
     "curves": [
       {
-        "label": "Illustrative fixture",
+        "label": "Illustrative paclitaxel what-if",
         "evidence": "illustrative",
-        "band_kind": "none",
+        "band_kind": "sensitivity",
         "points": [
           {
             "day": 0,
             "volume_cm3": 10,
-            "lower_cm3": null,
-            "upper_cm3": null
+            "lower_cm3": 10,
+            "upper_cm3": 10
           },
           {
-            "day": 21,
-            "volume_cm3": 8,
-            "lower_cm3": null,
-            "upper_cm3": null
+            "day": 1,
+            "volume_cm3": 9.8,
+            "lower_cm3": 9.6,
+            "upper_cm3": 10.0
+          },
+          {
+            "day": 2,
+            "volume_cm3": 9.6,
+            "lower_cm3": 9.2,
+            "upper_cm3": 9.9
+          },
+          {
+            "day": 3,
+            "volume_cm3": 9.4,
+            "lower_cm3": 8.9,
+            "upper_cm3": 9.8
           }
         ]
       }
     ],
-    "model_version": "synthetic-fixture-v1",
+    "model_version": "mech-fixture-v1",
     "assumptions": [
-      "Illustrative points chosen to test rendering, not computed by a trained model."
+      "Growth and suppression rates are illustrative assumptions, not fitted."
     ],
     "warnings": [
       "Synthetic fixture"
@@ -309,35 +321,47 @@
     "tolerance_cm3": 0.0001,
     "cases": [
       {
-        "label": "fixture shape only",
+        "label": "synthetic interface case, paclitaxel on, 3 days",
         "baseline_volume_cm3": 10,
         "request": {
           "contract_version": 1,
           "case_id": "00000000-0000-4000-8000-000000000001",
           "engine": "mechanistic",
-          "horizon_days": 21,
+          "horizon_days": 3,
           "intervention": "paclitaxel",
           "sensitivity_scale": 1,
-          "model_version": "synthetic-fixture-v1",
+          "model_version": "mech-fixture-v1",
           "seed": 7
         },
         "expected_curves": [
           {
-            "label": "Illustrative fixture",
+            "label": "Illustrative paclitaxel what-if",
             "evidence": "illustrative",
-            "band_kind": "none",
+            "band_kind": "sensitivity",
             "points": [
               {
                 "day": 0,
                 "volume_cm3": 10,
-                "lower_cm3": null,
-                "upper_cm3": null
+                "lower_cm3": 10,
+                "upper_cm3": 10
               },
               {
-                "day": 21,
-                "volume_cm3": 8,
-                "lower_cm3": null,
-                "upper_cm3": null
+                "day": 1,
+                "volume_cm3": 9.8,
+                "lower_cm3": 9.6,
+                "upper_cm3": 10.0
+              },
+              {
+                "day": 2,
+                "volume_cm3": 9.6,
+                "lower_cm3": 9.2,
+                "upper_cm3": 9.9
+              },
+              {
+                "day": 3,
+                "volume_cm3": 9.4,
+                "lower_cm3": 8.9,
+                "upper_cm3": 9.8
               }
             ]
           }
