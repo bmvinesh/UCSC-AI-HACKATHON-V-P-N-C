@@ -1,0 +1,12 @@
+{
+  "_notice": "Model assets the GX10 is expected to hold. models.sh fetches nothing that is not listed here.",
+  "runtime": "ollama",
+  "assets": [
+    {
+      "name": "qwen3.6:35b",
+      "role": "local explanation model (APP_QWEN_MODEL_ID)",
+      "digest": "07d35212591fc27746f0a317c975a6d68754fb38e9053d82e25f06057af28522",
+      "bytes": 23938333577
+    }
+  ]
+}

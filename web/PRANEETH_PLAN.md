@@ -113,9 +113,9 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | S0 | Plan, change gate, role branch | Workflow | H0 | none | done |
 | G1 | GX10 and Qwen runtime inventory, read-only | Deliver 1 | H0 to H1 | none | done |
 | E1 | Python and CUDA environment on the GX10, proposed pins | Deliver 1, 5 | H0 to H2 | none | done |
-| M1 | Model and runtime assets: verify what is installed, fetch only what is missing | Deliver 1 | H0 to H2 | G1, Q9 | active |
-| M2 | Dataset fetch with checksums | Deliver 5 | H1 to H4 | D10 | todo |
-| M3 | Training run harness, then the runs | Deliver 5 | H2 to H12 | E1, M2, D11 | todo |
+| M1 | Model and runtime assets: verify what is installed, fetch only what is missing | Deliver 1 | H0 to H2 | G1, Q9 | done |
+| M2 | Dataset fetch with checksums | Deliver 5 | H1 to H4 | D10 | blocked |
+| M3 | Training run harness, then the runs | Deliver 5 | H2 to H12 | E1, M2, D11 | active |
 | M4 | Export run and on-device parity run | Deliver 5 | H8 to H18 | M3, D3 | todo |
 | C1 | Hour 1 freeze: agree DTO and engine semantics, resolve section 8 | Deliver 3 | H0.25 to H1 | all owners | todo |
 | F1 | React, Vite, TypeScript, Tailwind scaffold, versions pinned on aarch64 | Deliver 2 | H1 to H2 | none | todo |
@@ -154,7 +154,7 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 - Behaviour: create `.venv/`, install a CUDA build of PyTorch that supports aarch64 and this driver, plus ONNX and ONNX Runtime. The probe prints versions, `torch.cuda.is_available()`, the device name, and the result of one small tensor operation on CPU and on CUDA.
 - Done when: the probe passes twice from a fresh shell, and the exact working versions are sent to Chaandan as proposed pins (D12). I do not edit the root `pyproject.toml` or lockfile.
 - Verify: `scripts/gx10/setup_env.sh`, then `.venv/bin/python scripts/gx10/probe_env.py`.
-- Result 2026-10-11: Python 3.12.3, `torch 2.14.1+cu130`, `numpy 2.5.4`, `onnx 1.23.2`, `onnxruntime 1.31.0`, pinned in `scripts/gx10/requirements-gx10.txt`. CUDA is available on the NVIDIA GB10. A 2048 by 2048 float32 matmul took a median 0.026 s on CPU and 0.001 s on CUDA; that is one synthetic operation, not a training benchmark. A small MLP exported to ONNX matched PyTorch to 3e-08. The install took 10 minutes and `.venv/` is about 6 GB.
+- Result 2026-10-11: Python 3.12.3, `torch 2.14.1+cu130`, `numpy 2.5.4`, `onnx 1.23.2`, `onnxruntime 1.31.0`, pinned in `scripts/gx10/requirements-gx10.txt`. CUDA is available on the NVIDIA GB10. A 2048 by 2048 float32 matmul took a median 0.026 s on CPU and 0.001 s on CUDA; that is one synthetic operation, not a training benchmark. A small MLP exported to ONNX matched PyTorch to 3e-08. The install took 10 minutes and `.venv/` is 5.4 GB.
 - Two facts for Vinesh: the aarch64 `onnxruntime` wheel has only the CPU provider, so the local handler runs the ONNX graphs on CPU while PyTorch does the GPU work; and the probe used the legacy exporter (`dynamo=False`), because the default exporter in this PyTorch needs `onnxscript`, which is not installed.
 
 ### M1 Model and runtime assets
@@ -164,6 +164,7 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 - Default until Q9 is answered: use the installed `qwen3.6:35b`, so no LLM download is needed.
 - Done when: `status` output is recorded, and the endpoint, served ID and quantization are handed to Nisheeth for `APP_QWEN_BASE_URL` and `APP_QWEN_MODEL_ID`, with no secret.
 - Verify: `scripts/gx10/models.sh status` twice, compare; confirm the Qwen process ID is unchanged.
+- Result 2026-10-11: the lock holds one asset, `qwen3.6:35b`, identified by its Ollama digest. `status` reports it `ok`; `fetch` pulled nothing because nothing is missing. Assets are checked by Ollama digest, not a file SHA-256, because that is the identity the runtime exposes.
 
 ### M2 Dataset fetch
 
@@ -367,3 +368,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-10 | S0 | `9134d9a` | Committed on `dev/praneeth-ui-gx10`. Push to `origin` was refused with HTTP 403: the token on this machine cannot write to the repository. Gate base is now read from local `git config gate.baseRef`. | S0 done. `main` still at `381c0a2`; Praneeth to push after re-authenticating. |
 | 2026-10-11 | G1 | this commit | `scripts/gx10/inventory.sh` run twice gave identical output. `--completion` returned the expected reply cold and warm; timings and memory are in the G1 notes. No process was restarted. Output searched for token-like strings: none. Also fixed the Claude Code edit hook to resolve the repository from the working directory. | Raw output is in the ignored `runtime/gx10/`. |
 | 2026-10-11 | E1 | this commit | `setup_env.sh` built `.venv/`; `probe_env.py` printed `result: PASS` twice from separate shells; the pinned requirements file resolves with a pip dry run. Versions and timings are in the E1 notes. | Pins go to Chaandan as request D12. |
+| 2026-10-11 | M1 | this commit | `models.sh status` exits 0 with `ok qwen3.6:35b`. Against a temporary lock with a wrong digest and an absent model it printed `mismatch` and `missing` and exited 1. `fetch` with nothing missing pulled nothing. The `ollama serve` process ID stayed 2142. | No model download was needed. M2 is blocked on Vinesh's source list (D10). |
