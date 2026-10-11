@@ -1,5 +1,5 @@
 {
-  "_notice": "All examples are synthetic interface fixtures; no actual model exists or has trained.",
+  "_notice": "All examples are synthetic interface fixtures; no actual model exists or has trained. Proposed redesign examples; zero hashes are placeholders, never release-valid.",
   "CaseRecord": {
     "id": "00000000-0000-4000-8000-000000000001",
     "label": "Synthetic interface case",
@@ -126,8 +126,12 @@
     "empirical_available": false,
     "mechanistic_available": true,
     "chat_available": false,
-    "model_version": null,
-    "status": "degraded"
+    "empirical_model_version": null,
+    "mechanistic_model_version": "mech-fixture-v1",
+    "status": "degraded",
+    "degraded_reasons": [
+      "Empirical artifact absent in fixture release."
+    ]
   },
   "Problem": {
     "code": "MODEL_UNAVAILABLE",
@@ -135,22 +139,49 @@
     "retryable": false,
     "trace_id": "fixture-trace"
   },
-  "ModelManifest": {
+  "EmpiricalManifest": {
     "contract_version": 1,
+    "engine": "empirical",
     "model_version": "synthetic-fixture-v1",
-    "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-    "artifact_path": "fixture-only.onnx",
-    "input_names": [
-      "features"
+    "onnx_path": "empirical/synthetic-fixture-v1/model.onnx",
+    "onnx_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "preprocessing_path": "empirical/synthetic-fixture-v1/preprocessing.json",
+    "preprocessing_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "model_card_path": "empirical/synthetic-fixture-v1/MODEL_CARD.md",
+    "inputs": [
+      {
+        "name": "baseline_volume_cm3",
+        "shape": [
+          "batch",
+          1
+        ]
+      },
+      {
+        "name": "elapsed_days",
+        "shape": [
+          "batch",
+          1
+        ]
+      }
     ],
-    "feature_order": [
-      "log_baseline_ftv_cm3",
-      "elapsed_days"
+    "outputs": [
+      {
+        "name": "log_volume_ratio",
+        "shape": [
+          "batch",
+          1
+        ]
+      },
+      {
+        "name": "volume_cm3",
+        "shape": [
+          "batch",
+          1
+        ]
+      }
     ],
-    "feature_count": 2,
-    "output_name": "log_volume_ratio",
     "dtype": "float32",
-    "feature_transform": "fixture-only-preprocessing.json",
+    "volume_epsilon_cm3": 0.01,
     "validated_horizon_days": 21,
     "cancer": "breast",
     "intervention": "paclitaxel",
@@ -162,6 +193,156 @@
     "test_patients": 0,
     "limits": [
       "No model file exists; zero hash is only a placeholder, never release-valid."
+    ]
+  },
+  "MechanisticManifest": {
+    "contract_version": 1,
+    "engine": "mechanistic",
+    "model_version": "mech-fixture-v1",
+    "onnx_path": "mechanistic/mech-fixture-v1/model.onnx",
+    "onnx_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "model_card_path": "mechanistic/mech-fixture-v1/MODEL_CARD.md",
+    "inputs": [
+      {
+        "name": "baseline_volume_cm3",
+        "shape": [
+          1
+        ]
+      },
+      {
+        "name": "days",
+        "shape": [
+          "T"
+        ]
+      },
+      {
+        "name": "intervention_on",
+        "shape": [
+          1
+        ]
+      },
+      {
+        "name": "sensitivity_scale",
+        "shape": [
+          1
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "volume_cm3",
+        "shape": [
+          "T"
+        ]
+      },
+      {
+        "name": "lower_cm3",
+        "shape": [
+          "T"
+        ]
+      },
+      {
+        "name": "upper_cm3",
+        "shape": [
+          "T"
+        ]
+      }
+    ],
+    "dtype": "float32",
+    "max_horizon_days": 84,
+    "parameter_basis": "assumption",
+    "assumptions": [
+      "Growth and suppression rates are illustrative assumptions, not fitted."
+    ],
+    "band_kind": "sensitivity",
+    "parity_tolerance": 0.0001,
+    "limits": [
+      "Illustrative what-if; not a validated counterfactual."
+    ]
+  },
+  "ReleaseIndex": {
+    "contract_version": 1,
+    "release_id": "fixture-r0",
+    "empirical_manifest": null,
+    "mechanistic_manifest": {
+      "path": "mechanistic/mech-fixture-v1/manifest.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "case_catalogs": [
+      {
+        "path": "cases/synthetic-v1.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "source": "synthetic"
+      }
+    ],
+    "explanation_templates": {
+      "path": "templates/explanations-v1.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "knowledge": null
+  },
+  "ExplanationTemplates": {
+    "templates_version": "templates-v1",
+    "number_format": {
+      "volume_cm3_decimals": 1,
+      "ratio_decimals": 2
+    },
+    "templates": [
+      {
+        "id": "illustrative-basic",
+        "when_source": [
+          "mechanistic",
+          "synthetic"
+        ],
+        "text": "This {request.engine} what-if over {request.horizon_days} days is illustrative and cannot establish treatment efficacy.",
+        "referenced_fields": [
+          "request.engine",
+          "request.horizon_days",
+          "assumptions"
+        ]
+      }
+    ]
+  },
+  "ParityFixture": {
+    "engine": "mechanistic",
+    "model_version": "mech-fixture-v1",
+    "tolerance_cm3": 0.0001,
+    "cases": [
+      {
+        "label": "fixture shape only",
+        "baseline_volume_cm3": 10,
+        "request": {
+          "contract_version": 1,
+          "case_id": "00000000-0000-4000-8000-000000000001",
+          "engine": "mechanistic",
+          "horizon_days": 21,
+          "intervention": "paclitaxel",
+          "sensitivity_scale": 1,
+          "model_version": "synthetic-fixture-v1",
+          "seed": 7
+        },
+        "expected_curves": [
+          {
+            "label": "Illustrative fixture",
+            "evidence": "illustrative",
+            "band_kind": "none",
+            "points": [
+              {
+                "day": 0,
+                "volume_cm3": 10,
+                "lower_cm3": null,
+                "upper_cm3": null
+              },
+              {
+                "day": 21,
+                "volume_cm3": 8,
+                "lower_cm3": null,
+                "upper_cm3": null
+              }
+            ]
+          }
+        ]
+      }
     ]
   }
 }

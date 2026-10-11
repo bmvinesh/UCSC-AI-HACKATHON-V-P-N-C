@@ -14,7 +14,7 @@ Choose breast cancer because serial treatment MRI and released measurement table
 
 **Local:** one FastAPI app serves the built React frontend, validated API, SQLite sessions/jobs, growth inference and background-job supervisor. Process/thread executors belong to this monolith. The app calls the installed local Qwen runtime through an adapter. No application service-to-service architecture or broker.
 
-**Pages:** same React UI uses a `BrowserEngine` adapter. An ONNX model and preprocessing manifest load once in a Web Worker; WASM inference is the compatible baseline. Charts, selection, assumptions and export run without a Python server. Qwen chat is visibly unavailable; a deterministic explanation of the current result remains available. Optional precomputed scenarios are labeled cached fixtures, not fresh inference.
+**Pages:** same React UI uses a `BrowserEngine` adapter. The empirical and mechanistic ONNX graphs, which contain all transforms, load once in a Web Worker as selected by the release index; WASM inference is the compatible baseline. Charts, selection, assumptions and export run without a Python server. Qwen chat is visibly unavailable; a deterministic explanation of the current result remains available. Optional precomputed scenarios are labeled cached fixtures, not fresh inference.
 
 Select the adapter explicitly from build config. Pages never probes visitor localhost, contacts a public GPU endpoint, or puts a credential in client config. Local UI talks to its same-origin API. No Vercel/Railway dependency: GitHub Pages is the requested public target.
 
@@ -25,15 +25,15 @@ Select the adapter explicitly from build config. Pages never probes visitor loca
 | `contracts/` | Schemas, semantic validation rules, generated interfaces | Train, access database, render UI |
 | `app/routes/` | Parse request, invoke service, shape response | Run GPU/LLM work inline |
 | `app/services/scenarios.py` | Coordinate validated scenario lifecycle | Numerical formulas or SQL inline |
-| `app/persistence/` | SQLite transaction/repository logic | Invoke model or change scientific outputs |
-| `app/jobs/` | Admission, claims, progress, recovery, cancellation | Define biology or UI state |
+| `app/persistence/` | SQLite transactions; implements `JobStore`/`ResultCache` | Decide job policy, invoke model or change scientific outputs |
+| `app/jobs/` | Job policy (claims, leases, progress, cancellation, recovery) behind the `JobStore` port; cache keys; `admission_check` | SQL, routes, biology or UI state |
 | `app/integrations/qwen.py` | Local model runtime protocol and health | Determine volume or drug efficacy |
 | `app/services/explanations.py` | Grounded context, validation and fallback | Alter model outputs |
 | `modeling/data/` | Import/join/audit/preprocess records | Train or fabricate labels |
 | `modeling/train/` | Patient-disjoint fitting and validation | Import UI/routes or publish automatically |
 | `modeling/simulation/` | Growth/intervention math and invariants | Call LLM, database, network |
-| `modeling/export/` | Export checkpoint/scaler/model card and parity | Fit on test patients |
-| `web/src/engines/` | Same domain interface for API/browser engines | Mix charts, clinical logic, credentials |
+| `modeling/export/` | Export ONNX graphs with all transforms baked in, manifests, model cards, parity fixtures | Fit on test patients |
+| `web/src/engines/` | Same domain interface for API/browser engines; run ONNX graphs and render templates | Implement transforms or formulas, mix charts, clinical logic, credentials |
 | `web/src/features/` | Case/curve/assumption/explanation interactions | Duplicate model formulas or API schemas |
 
 No global service locator, universal manager class, or invented event bus. Use explicit dependencies and small pure functions. Stable data contract allows code to be local or browser-executed without duplicating interpretation.
@@ -73,7 +73,7 @@ The final four hours are **inside** the chosen duration. For 24h, hardening is h
 ### Hour 12-18: merge and pipeline hookup
 
 - Connect UI to local API/jobs and to the browser model using the same domain engine interface.
-- Run held-out validation against persistence/linear baselines; export preprocessing and verify Python/ONNX/browser parity.
+- Run held-out validation against persistence/linear baselines; export both artifact sets and verify Python/ONNX/browser parity with the DTO-level fixtures.
 - Bind installed Qwen runtime; generate an explanation from stored findings, never free-form new measurements.
 - Verify job cancellation/restart semantics, patient leakage checks, no synchronous inference in POST routes, local secrets absent from bundles.
 - Exit: real or explicitly synthetic local flow, browser model result and parity evidence, first Pages build ready, local chat can fail without breaking modeling.

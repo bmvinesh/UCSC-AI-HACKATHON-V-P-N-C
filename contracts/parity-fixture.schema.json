@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:oncogrowth:parity-fixture:1",
+  "title": "Parity fixture v1 (C17: DTO-level, so a transform mismatch in any runtime fails it)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "engine": {
+      "enum": [
+        "empirical",
+        "mechanistic"
+      ]
+    },
+    "model_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tolerance_cm3": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "baseline_volume_cm3": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "request": {
+            "$ref": "urn:oncogrowth:domain:1#/$defs/ScenarioRequest"
+          },
+          "expected_curves": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "urn:oncogrowth:domain:1#/$defs/Curve"
+            }
+          }
+        },
+        "required": [
+          "label",
+          "baseline_volume_cm3",
+          "request",
+          "expected_curves"
+        ]
+      }
+    }
+  },
+  "required": [
+    "engine",
+    "model_version",
+    "tolerance_cm3",
+    "cases"
+  ]
+}

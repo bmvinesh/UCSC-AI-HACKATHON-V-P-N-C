@@ -205,7 +205,7 @@
           ]
         },
         "horizon_days": {
-          "type": "number",
+          "type": "integer",
           "minimum": 1,
           "maximum": 84
         },
@@ -294,7 +294,6 @@
         "evidence": {
           "type": "string",
           "enum": [
-            "observed",
             "forecast",
             "illustrative"
           ]
@@ -442,7 +441,8 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "description": "kind=scenario: ScenarioResult.id. kind=explanation: ExplanationResult.id."
         },
         "error": {
           "anyOf": [
@@ -573,7 +573,15 @@
         "chat_available": {
           "type": "boolean"
         },
-        "model_version": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "degraded",
+            "starting"
+          ]
+        },
+        "empirical_model_version": {
           "anyOf": [
             {
               "type": "string",
@@ -584,13 +592,23 @@
             }
           ]
         },
-        "status": {
-          "type": "string",
-          "enum": [
-            "ready",
-            "degraded",
-            "starting"
+        "mechanistic_model_version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
           ]
+        },
+        "degraded_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       },
       "required": [
@@ -598,11 +616,13 @@
         "empirical_available",
         "mechanistic_available",
         "chat_available",
-        "model_version",
-        "status"
+        "status",
+        "empirical_model_version",
+        "mechanistic_model_version",
+        "degraded_reasons"
       ]
     },
-    "ModelManifest": {
+    "EmpiricalManifest": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -613,37 +633,82 @@
           "type": "string",
           "minLength": 1
         },
-        "sha256": {
-          "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
-        },
-        "artifact_path": {
+        "onnx_path": {
           "type": "string",
           "minLength": 1
         },
-        "input_names": {
-          "const": [
-            "features"
-          ]
+        "onnx_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
         },
-        "feature_order": {
-          "const": [
-            "log_baseline_ftv_cm3",
-            "elapsed_days"
-          ]
-        },
-        "feature_count": {
-          "const": 2
-        },
-        "output_name": {
-          "const": "log_volume_ratio"
+        "model_card_path": {
+          "type": "string",
+          "minLength": 1
         },
         "dtype": {
           "const": "float32"
         },
-        "feature_transform": {
+        "parity_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "limits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "engine": {
+          "const": "empirical"
+        },
+        "preprocessing_path": {
           "type": "string",
           "minLength": 1
+        },
+        "preprocessing_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "inputs": {
+          "const": [
+            {
+              "name": "baseline_volume_cm3",
+              "shape": [
+                "batch",
+                1
+              ]
+            },
+            {
+              "name": "elapsed_days",
+              "shape": [
+                "batch",
+                1
+              ]
+            }
+          ]
+        },
+        "outputs": {
+          "const": [
+            {
+              "name": "log_volume_ratio",
+              "shape": [
+                "batch",
+                1
+              ]
+            },
+            {
+              "name": "volume_cm3",
+              "shape": [
+                "batch",
+                1
+              ]
+            }
+          ]
+        },
+        "volume_epsilon_cm3": {
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "validated_horizon_days": {
           "type": "number",
@@ -663,16 +728,7 @@
           ]
         },
         "band_kind": {
-          "type": "string",
-          "enum": [
-            "none",
-            "sensitivity",
-            "empirical_interval"
-          ]
-        },
-        "parity_tolerance": {
-          "type": "number",
-          "exclusiveMinimum": 0
+          "const": "none"
         },
         "train_patients": {
           "type": "integer",
@@ -685,6 +741,62 @@
         "test_patients": {
           "type": "integer",
           "minimum": 0
+        }
+      },
+      "required": [
+        "band_kind",
+        "cancer",
+        "contract_version",
+        "dtype",
+        "engine",
+        "inputs",
+        "intervention",
+        "limits",
+        "model_card_path",
+        "model_version",
+        "onnx_path",
+        "onnx_sha256",
+        "outputs",
+        "parity_tolerance",
+        "preprocessing_path",
+        "preprocessing_sha256",
+        "test_patients",
+        "train_patients",
+        "trained_on",
+        "validated_horizon_days",
+        "validation_patients",
+        "volume_epsilon_cm3"
+      ]
+    },
+    "MechanisticManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "const": 1
+        },
+        "model_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "onnx_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "onnx_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "model_card_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dtype": {
+          "const": "float32"
+        },
+        "parity_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "limits": {
           "type": "array",
@@ -692,29 +804,100 @@
             "type": "string",
             "minLength": 1
           }
+        },
+        "engine": {
+          "const": "mechanistic"
+        },
+        "inputs": {
+          "const": [
+            {
+              "name": "baseline_volume_cm3",
+              "shape": [
+                1
+              ]
+            },
+            {
+              "name": "days",
+              "shape": [
+                "T"
+              ]
+            },
+            {
+              "name": "intervention_on",
+              "shape": [
+                1
+              ]
+            },
+            {
+              "name": "sensitivity_scale",
+              "shape": [
+                1
+              ]
+            }
+          ]
+        },
+        "outputs": {
+          "const": [
+            {
+              "name": "volume_cm3",
+              "shape": [
+                "T"
+              ]
+            },
+            {
+              "name": "lower_cm3",
+              "shape": [
+                "T"
+              ]
+            },
+            {
+              "name": "upper_cm3",
+              "shape": [
+                "T"
+              ]
+            }
+          ]
+        },
+        "max_horizon_days": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 84
+        },
+        "parameter_basis": {
+          "type": "string",
+          "enum": [
+            "assumption",
+            "conditional_calibration"
+          ]
+        },
+        "assumptions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "band_kind": {
+          "const": "sensitivity"
         }
       },
       "required": [
-        "contract_version",
-        "model_version",
-        "sha256",
-        "artifact_path",
-        "input_names",
-        "feature_order",
-        "feature_count",
-        "output_name",
-        "dtype",
-        "feature_transform",
-        "validated_horizon_days",
-        "cancer",
-        "intervention",
-        "trained_on",
+        "assumptions",
         "band_kind",
-        "parity_tolerance",
-        "train_patients",
-        "validation_patients",
-        "test_patients",
-        "limits"
+        "contract_version",
+        "dtype",
+        "engine",
+        "inputs",
+        "limits",
+        "max_horizon_days",
+        "model_card_path",
+        "model_version",
+        "onnx_path",
+        "onnx_sha256",
+        "outputs",
+        "parameter_basis",
+        "parity_tolerance"
       ]
     }
   }
