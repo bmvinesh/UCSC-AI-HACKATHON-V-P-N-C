@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Types derived from ../contracts (see scripts/derive-contracts.mjs)
+.contracts

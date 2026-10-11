@@ -119,10 +119,10 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | M4 | Export run and on-device parity run | Deliver 5 | H8 to H18 | M3, D3 | todo |
 | C1 | Hour 1 freeze: agree DTO and engine semantics, resolve section 8 | Deliver 3 | H0.25 to H1 | all owners | todo |
 | F1 | React, Vite, TypeScript, Tailwind scaffold, versions pinned on aarch64 | Deliver 2 | H1 to H2 | none | done |
-| F2 | `DomainEngine` interface and fixture-backed engine | Deliver 3 | H1 to H4 | D1 (interim below), Q7 | active |
+| F2 | `DomainEngine` interface and fixture-backed engine | Deliver 3 | H1 to H4 | D1 (interim below), Q7 | done |
 | F5 | `BrowserEngine`: release index, two ONNX sessions in a worker, DTO assembly, parity. My first slice after the freeze, per the redesign | Deliver 3 | H2 to H12 | D3, Q11 | todo |
 | F6 | Template renderer, and explanation states for local and Pages | Deliver 4 | H4 to H12 | F2, D3 | todo |
-| F3 | Case list, observations from CaseRecord, chart, assumptions and model-card panel | Deliver 2 | H2 to H8 | F2 | todo |
+| F3 | Case list, observations from CaseRecord, chart, assumptions and model-card panel | Deliver 2 | H2 to H8 | F2 | active |
 | F4 | `LocalApiEngine`: session, idempotent submit, polling, cancel, Problems | Deliver 3 | H4 to H12 | D4 | todo |
 | T1 | `app/telemetry`: timings, memory, source attribution | Deliver 5 | H12 to H18 | D5, Q4 | todo |
 | G2 | On-device integration and measurements | Deliver 5 | H12 to H20 | D4, D6 | todo |
@@ -229,6 +229,7 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 - Import rule: features depend on the interface only. They never import a concrete engine, `fetch`, or the ONNX runtime. Engines depend on generated DTOs.
 - Done when: the UI can run end to end on synthetic fixtures; every payload passes the generated validator; fixtures are read from the contract source, not copied into `web/`.
 - Verify (F1): `npm --prefix web run typecheck`, `npm --prefix web test`.
+- Result 2026-10-11: `web/src/contracts/` (types and `parseContract`), `web/src/engines/` (`DomainEngine`, `EngineError`, `LocalJobs`, `FixtureEngine`). `tests/frontend/engineConformance.ts` is one suite that every engine must pass; `LocalApiEngine` and `BrowserEngine` will run the same file, which is how the first acceptance row gets its evidence. Fixtures are a read-only import of `contracts/examples.json` (my default for Q7). Until F4 and F5 exist, both profiles run on the fixture engine and the UI says so.
 
 ### F3 Case flow and chart
 
@@ -378,3 +379,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-11 | M3 | this commit | `tests/hardware/run_harness_test.sh`: 17 checks passed (success, failure, missing output, record present while running, second run refused, interrupt, bad label, dirty tree refused). | Harness only. No training has been run. Blocked on D10 and D11. |
 | 2026-10-11 | F1 | this commit | On the GX10 after `npm ci` from the lockfile: `typecheck` clean, `lint` exit 0, `test` 5 passed, `build` succeeded for both profiles. The Pages build references assets under `/UCSC-AI-HACKATHON-V-P-N-C/`; a search of that bundle for `localhost`, `127.0.0.1`, `APP_`, the Ollama port and the model name found nothing. In the dev server the shell rendered at desktop and 375 px widths, the `#/model` deep link loaded directly, and the console had no errors. | Shell only: it states that no case, model or result is loaded. F2 needs generated DTOs (D1). |
 | 2026-10-11 | F1 | `8ba24b3` | `origin/main` now holds the redesign (`7d6cb32`, merged by Chaandan). Merged it into the role branch with no conflicts; the gate passes against `origin/main` and the temporary `gate.baseRef` is removed. | F1 done. F2 starts with the D1 interim. |
+| 2026-10-11 | F2 | this commit | `npm test`: 32 passed in 5 files, including every example in `contracts/examples.json` against its schema, four rejected mutations, and the conformance suite on `FixtureEngine`. `typecheck` and `lint` clean. Pages build succeeds. | Types are derived locally into the ignored `web/.contracts/`; nothing derived is committed. |

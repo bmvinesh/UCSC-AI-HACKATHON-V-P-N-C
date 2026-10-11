@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss()],
     server: {
       host: '127.0.0.1',
+      // The contract schemas and fixtures are read from ../contracts, never copied.
+      fs: { allow: ['..'] },
       // Keeps the local UI same-origin with the API during development.
       proxy: { '/api': apiTarget },
     },
