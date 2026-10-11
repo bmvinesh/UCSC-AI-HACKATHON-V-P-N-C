@@ -122,8 +122,8 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | F2 | `DomainEngine` interface and fixture-backed engine | Deliver 3 | H1 to H4 | D1 (interim below), Q7 | done |
 | F5 | `BrowserEngine`: release index, two ONNX sessions in a worker, DTO assembly, parity. My first slice after the freeze, per the redesign | Deliver 3 | H2 to H12 | D3, Q11 | todo |
 | F6 | Template renderer, and explanation states for local and Pages | Deliver 4 | H4 to H12 | F2, D3 | todo |
-| F3 | Case list, observations from CaseRecord, chart, assumptions and model-card panel | Deliver 2 | H2 to H8 | F2 | active |
-| F4 | `LocalApiEngine`: session, idempotent submit, polling, cancel, Problems | Deliver 3 | H4 to H12 | D4 | todo |
+| F3 | Case list, observations from CaseRecord, chart, assumptions and model-card panel | Deliver 2 | H2 to H8 | F2, Q13 | done, except manifest facts (Q13) |
+| F4 | `LocalApiEngine`: session, idempotent submit, polling, cancel, Problems | Deliver 3 | H4 to H12 | D4 | active |
 | T1 | `app/telemetry`: timings, memory, source attribution | Deliver 5 | H12 to H18 | D5, Q4 | todo |
 | G2 | On-device integration and measurements | Deliver 5 | H12 to H20 | D4, D6 | todo |
 | F7 | Resilience, accessibility, provenance, export | Deliver 6 | H18 to H24 | F4, F5, Q6 | todo |
@@ -237,6 +237,8 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 - Done when: selecting a case shows observed points, drawn from the `CaseRecord`, with cm3 units, source and measurement window; forecast and illustrative curves are distinct in drawing and in text; band kind is labelled; cached and synthetic labels show with origin; assumptions, warnings, provenance limitations and manifest facts (trained_on, patient counts, validated horizon, parameter basis, limits) are readable; the horizon control takes whole days only, bounded by 1 to 84 and by the selected engine's manifest (`validated_horizon_days` or `max_horizon_days`); sensitivity is bounded 0 to 2; the empirical engine is offered only for paclitaxel, scale 1 and an eligible case; a degraded engine shows its reason from `degraded_reasons`; layout works at narrow width.
 - Open decision, mine: plain SVG chart or a chart library. Default is plain SVG, which adds no dependency. If a library is added, record why in section 9.
 - Verify (F1): component tests on fixtures; manual check at narrow width.
+- Result 2026-10-11: built in `web/src/features/` (cases, chart, scenario, model). The chart is plain SVG with no chart library: observed dots from the `CaseRecord`, solid forecast lines, dashed illustrative lines, a shaded band only when the points carry one, a hover and arrow-key readout, a text legend and a data table. Series colours were checked with the dataviz palette validator. Input bounds are read from the schema, not typed in. A result can be kept on the chart to compare paclitaxel with the no-intervention comparator.
+- Not done: manifest facts (trained_on, patient counts, validated horizon, parameter basis). `DomainEngine` has no method that returns a manifest, and the REST table has no route for one, so the panel says those details appear once an artifact is published. See Q13. The horizon control is bounded by the schema, and the engine rejects anything beyond its manifest with a Problem.
 
 ### F4 LocalApiEngine
 
@@ -346,6 +348,7 @@ Still open:
 - **Q10, team.** Should authorship of the training code move to me as well, or only its execution? This plan assumes execution only (I12). A move needs the registry changed on `origin/main`; the gate's contract-drift check then forces this plan to be re-derived.
 
 - **Q11, Vinesh.** On Pages there is no Python, so the browser has to apply the admission rules that `admission_check` owns. That is a second implementation of one rule set. Can the parity fixtures include rejected requests with the expected `Problem.code`, so my check is pinned to his?
+- **Q13, Nisheeth and Vinesh.** How does the local UI read the manifests and model cards? The REST table has no route for them. Options: the monolith serves `artifacts/public/` as static files, so both profiles read the release index the same way; or a new route. I prefer the static mount, because it needs no new DTO.
 - **Q12, Vinesh.** The redesign itself notes that no graph exists yet, so nothing shows the closed-form mechanistic graph uses only operators that ONNX Runtime Web supports. I will run the first synthetic graph in the WASM runtime as soon as it is published and report the result before the freeze is relied on.
 
 ### 8a. My rows in the boundary redesign
@@ -381,3 +384,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-11 | F1 | `8ba24b3` | `origin/main` now holds the redesign (`7d6cb32`, merged by Chaandan). Merged it into the role branch with no conflicts; the gate passes against `origin/main` and the temporary `gate.baseRef` is removed. | F1 done. F2 starts with the D1 interim. |
 | 2026-10-11 | F2 | this commit | `npm test`: 32 passed in 5 files, including every example in `contracts/examples.json` against its schema, four rejected mutations, and the conformance suite on `FixtureEngine`. `typecheck` and `lint` clean. Pages build succeeds. | Types are derived locally into the ignored `web/.contracts/`; nothing derived is committed. |
 | 2026-10-11 | F2 | this commit | Correction to the row above: at commit `881d9e2` `typecheck` and the Pages build were failing, because `tests/frontend/` could not resolve `vitest` from outside `web/`. I committed without reading the exit codes. Fixed with a `paths` entry in `web/tsconfig.app.json`. Now measured with exit codes: `typecheck` 0, `lint` 0, `test` 32 passed, Pages `build` 0. | Added `npm --prefix web run check`, which chains all four and stops on the first failure. It runs before every frontend commit from here on. |
+| 2026-10-11 | F3 | this commit | `npm --prefix web run check` exit 0: typecheck, lint, 46 tests, build. Tests cover the case facts with units and the synthetic label, the ineligible-case rule, a full scenario run, a failing engine shown as a typed Problem, stale-response rejection, overlapping runs, cancel, and a failed job. In the browser the chart, hover readout and result panel rendered with the fixture; the 375 px width was not re-checked for this slice. | A test caught a real bug: a failed job's Problem was shown as `[object Object]`. Fixed before commit. |

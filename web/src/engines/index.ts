@@ -3,7 +3,7 @@ import type { DomainEngine } from './DomainEngine.ts'
 import { FixtureEngine } from './fixture/FixtureEngine.ts'
 
 export type { DomainEngine } from './DomainEngine.ts'
-export { EngineError } from './EngineError.ts'
+export { EngineError, localProblem, toProblem } from './EngineError.ts'
 
 export interface EngineChoice {
   engine: DomainEngine

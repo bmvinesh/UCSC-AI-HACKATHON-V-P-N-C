@@ -21,3 +21,4 @@ export type {
   ScenarioResult,
 } from '../../.contracts/types'
 export { ContractError, parseContract, type ContractName, type ContractTypes } from './validate.ts'
+export { HORIZON_DAYS, QUESTION_MAX_LENGTH, SENSITIVITY_SCALE } from './bounds.ts'

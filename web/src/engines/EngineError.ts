@@ -15,3 +15,9 @@ export class EngineError extends Error {
 export function localProblem(code: Problem['code'], message: string, retryable = false): Problem {
   return { code, message, retryable, trace_id: `browser-${crypto.randomUUID()}` }
 }
+
+/** Any thrown value as a Problem, so the UI has one error shape and never shows a fault as success. */
+export function toProblem(error: unknown): Problem {
+  if (error instanceof EngineError) return error.problem
+  return localProblem('INTERNAL', error instanceof Error ? error.message : String(error))
+}
