@@ -2,8 +2,8 @@
 
 Role: [`docs/roles/02-nisheeth-backend.md`](../../docs/roles/02-nisheeth-backend.md) | Rules: [`CLAUDE.md`](../../CLAUDE.md) | Contracts: [`docs/CONTRACTS.md`](../../docs/CONTRACTS.md) (schema version 1)
 Contract fingerprint: `f4bfbd58fd59`
-**Next up:** N2 (sessions). N1b (types) is blocked on Chaandan's generator — handoff R1 in §7.
-Status: **N0 and N1 done and verified (§9). N1b blocked (R1). Everything else not started.** MVP only: build the smallest thing that satisfies the role's acceptance list, one task at a time, and verify each before the next. A box is checked only on observed evidence.
+**Next up:** N3 (admission, idempotency, reads). N1b (types) is blocked on Chaandan's generator — handoff R1 in §7.
+Status: **N0, N1, N2 done and verified (§9). N1b blocked (R1). Everything else not started.** MVP only: build the smallest thing that satisfies the role's acceptance list, one task at a time, and verify each before the next. A box is checked only on observed evidence.
 
 Lives in `app/persistence/` because `docs/**` belongs to Chaandan; this directory is Nisheeth's. (The earlier OncoVision data-prep plan was for a retired scope and is not part of this project.)
 
@@ -68,7 +68,7 @@ Dependency needs are *requests* to Chaandan (root lockfile) — never edits.
 | N0 ✅ | This plan, boundary/drift guard, nested `CLAUDE.md` pointers | — | — | `check_dev2.py audit` → PASS; guard tests pass |
 | N1 ✅ | DB foundation: `db.py` (connect, WAL, FK, busy timeout, `transaction`), `migrations.py`, `001_initial.sql` (7 tables, indexes, CHECKs), tests | 1 (database half) | — | Fresh DB migrates to v1; idempotent re-run; newer-DB and bad-migration refused/rolled back; constraints and indexed claim query verified; WAL reader not blocked by writer |
 | N1b | Imported validated types: use `app/generated/**` Pydantic models for all DTOs | 1 (types half) | **Chaandan: C2 freeze record + C3 generator** | A route-level test round-trips `contracts/examples.json` through the generated models; no local DTO exists |
-| N2 | Sessions: `app/session.py` + `app/persistence/sessions.py` — opaque id (`secrets`), expiry, `require_owner`, purge expired | 2 | N1 | Cookie attrs correct (HttpOnly, SameSite, Secure over HTTPS); expired/unknown rejected; session A cannot read B's job/result |
+| N2 ✅ | Sessions: `app/session.py` + `app/persistence/{sessions,timeutil}.py` — opaque id (`secrets`), expiry, `ensure_owner`, cookie header/parse, purge expired | 2 | N1 | Cookie attrs correct (HttpOnly, SameSite, Secure over HTTPS); missing/malformed/unknown/expired rejected; `ensure_owner` rejects another session's row. **Route-level isolation (A cannot read B's job/result through the API) is verified in N3/N4/N6, not here.** |
 | N3 | Admission and reads: `app/persistence/{cases,jobs,results,idempotency}.py`; one-transaction job+idempotency insert; replay returns stored response; hash mismatch → conflict; queue-capacity check per lane; `app/services/scenarios.py` coordinates | 3 (persistence half) | N1, N2 (types: N1b) | Tests: replay, mismatch, rollback leaves no job and no key, queue full, concurrent duplicate keys yield one job |
 | N4 | `app/settings.py` (`APP_*` → validated; maps to Vinesh's config dataclasses), `app/main.py` lifespan, routes per REST table with typed Problems | 3, 5 | N3, N1b, **Chaandan: FastAPI/uvicorn in lockfile**, **Vinesh: `load_release`, `admission_check`, `make_supervisor`** | Mock-profile app starts without GPU/weights; every route returns the specified status; POST returns 202 without waiting |
 | N5 | SQLite `JobStore`/`ResultCache`; run Vinesh's contract suite | 4 | N1, **Vinesh: `app/jobs/ports.py` + `tests/jobs/jobstore_contract.py`** | Contract suite passes against SQLite; running jobs reconcile to `failed/INTERRUPTED` on restart; a queued job is claimed at most once under concurrent claimers |
@@ -90,6 +90,7 @@ H1–2: N1 (migrations) — and report app skeleton/dependency list/start comman
 | R4 | Praneeth | Settings keys the UI/runtime need (Qwen endpoint/model ID, ports, origins); GX10 start expectations. Needed by N4. | open |
 | R5 | Team | D10 in `docs/integration/PLAN.md`: record Nisheeth's accept/object for the redesign rows C8–C12, C18, C21, C22, C26. This is a human decision; not recorded by this plan. | open |
 | R6 | Team | `app/__init__.py` is unlisted: assign an owner or confirm the namespace package is intended. | open |
+| R8 | Team (joint contract) | `Problem.code` has no session/auth code. N4 will map missing/expired session and not-owner to `NOT_FOUND` (also avoids revealing others' resources). If the UI needs to tell "session expired" apart, propose a code via the boundary-change process. Low priority. | open |
 | R7 | Self | D8: old branch `origin/claude/dreamy-brahmagupta-i6bey7` (retired OncoVision data-prep work) — drop or archive is Nisheeth's decision; untouched for now. | open |
 
 ## 8. Acceptance (from the role file — check only with evidence)
@@ -108,9 +109,11 @@ Handoff content when done: migration/start command, exact route fixtures, real t
 | --- | --- | --- | --- |
 | 2026-10-11 | N0 | Plan, `tests/persistence/check_dev2.py` (+ `test_check_dev2.py`), nested `CLAUDE.md` in `app/persistence`, `app/routes`, `tests/persistence` | `python3 -m unittest discover -s tests/persistence` → `Ran 11 tests ... OK`. `check_dev2.py audit --base origin/main` → `Result: PASS`; with a probe file `web_probe.ts` → `PROBLEM: ... outside Dev 2's writable boundary` and `Result: FAIL` (probe removed). |
 | 2026-10-11 | N1 | `app/persistence/{db.py,migrations.py,migrations/001_initial.sql}`, `tests/persistence/test_db_foundation.py`. A test caught a real bug in my first statement splitter (two statements on one line); fixed by splitting at `;` and added an edge-case test. | `python3 -m unittest discover -s tests/persistence` → `Ran 30 tests ... OK` (covers: WAL/FK/busy_timeout pragmas, commit/rollback, WAL reader not blocked by an open writer, second writer gets busy error, fresh migrate + idempotent re-run, newer-DB refusal, failed migration rolled back with version kept, numbering validation, trigger/semicolon/comment handling, job-state CHECKs, FK/JSON/STRICT enforcement, per-session idempotency uniqueness, hot queries use their indexes via EXPLAIN QUERY PLAN). **Not verified:** behaviour on the GX10 (aarch64, its SQLite/Python versions); SQLite older than 3.37 (rejection path only simulated); migration 001 against future contract changes. |
+| 2026-10-11 | N2 | `app/session.py`, `app/persistence/{sessions,timeutil}.py`, `tests/persistence/test_sessions.py`. Choices: fixed (non-sliding) TTL, default 8 h, max 7 d; SameSite=Lax; id = `token_urlsafe(32)` stored raw (local demo, no real-authentication claim); ms-precision RFC 3339 timestamps; purge skips sessions with queued/running jobs and rolls back per session on an FK violation. | `python3 -m unittest discover -s tests/persistence` → `Ran 45 tests ... OK`. Mutation check: changing expiry `>` to `>=` → 1 failure; dropping `running` from the purge guard → 1 failure; both reverted, suite `OK`. **Not verified:** the cookie against a real browser/HTTPS (no server yet, N4); origin check for mutations (CONTRACTS.md: "restrict mutations to the expected origin") — to be built with the routes in N4; route-level session isolation (N3/N4). |
 
 ## 10. Decisions
 
 | Date | Decision | Why |
 | --- | --- | --- |
 | 2026-10-11 | D-A … D-D (§4) | MVP: no new dependencies, direct transactions, reversible |
+| 2026-10-11 | D-E: session TTL is fixed (not sliding); cookie SameSite=Lax; origin check deferred to N4 | MVP; Lax keeps normal same-origin use working; the check belongs with the routes |
