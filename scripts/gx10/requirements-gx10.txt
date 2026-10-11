@@ -1,0 +1,7 @@
+# Python packages proven on the GX10 (aarch64, CUDA 13.0 driver) on 2026-10-11. Plan slice E1.
+# Proposed pins for Chaandan's root lockfile; installed here by setup_env.sh.
+# torch resolves to the +cu130 build through TORCH_INDEX_URL.
+torch==2.14.1
+numpy==2.5.4
+onnx==1.23.2
+onnxruntime==1.31.0
