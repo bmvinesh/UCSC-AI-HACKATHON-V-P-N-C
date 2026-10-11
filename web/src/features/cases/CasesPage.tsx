@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { Capabilities, CaseRecord, ScenarioResult } from '../../contracts/index.ts'
 import type { DomainEngine } from '../../engines/index.ts'
+import { ExplanationPanel } from '../explanation/ExplanationPanel.tsx'
+import { JobStatus } from '../jobs/JobStatus.tsx'
 import { ProblemNotice } from '../ProblemNotice.tsx'
 import { seriesFromResults } from '../chart/series.ts'
 import { VolumeChart } from '../chart/VolumeChart.tsx'
@@ -61,26 +63,13 @@ function CaseWorkspace({ record, capabilities }: { record: CaseRecord; capabilit
       <div className="grid gap-4 md:grid-cols-[18rem_1fr]">
         <ScenarioControls record={record} capabilities={capabilities} busy={state.phase === 'active'} onSubmit={run} />
         <div className="min-w-0 space-y-4">
-          <div aria-live="polite" className="text-sm">
-            {state.phase === 'idle' && <p className="text-slate-600">No scenario has been run for this case.</p>}
-            {state.phase === 'active' && (
-              <div className="flex flex-wrap items-center gap-3 rounded border border-slate-200 bg-white p-3">
-                <progress value={state.job.progress} max={1} className="h-2 w-40" aria-label="Job progress" />
-                <span>
-                  Job {state.job.state}, {Math.round(state.job.progress * 100)}%
-                </span>
-                <button type="button" onClick={cancel} className="rounded border border-slate-300 px-2 py-1 text-xs font-medium">
-                  Cancel
-                </button>
-              </div>
-            )}
-            {state.phase === 'cancelled' && <p className="rounded border border-slate-200 bg-white p-3">The job was cancelled. No result was produced.</p>}
-            {state.phase === 'problem' && <ProblemNotice problem={state.problem} />}
-          </div>
+          <JobStatus state={state} idleText="No scenario has been run for this case." onCancel={cancel} />
 
           {current && (
             <>
               <ResultFacts result={current} heading="Current result" />
+              {/* The key drops any explanation of an earlier result. */}
+              <ExplanationPanel key={current.id} result={current} chatAvailable={capabilities.chat_available} />
               {pinned?.id !== current.id && (
                 <button type="button" onClick={() => setPinned(current)} className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium">
                   Keep on the chart for comparison

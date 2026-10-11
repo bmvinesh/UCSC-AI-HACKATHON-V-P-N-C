@@ -120,8 +120,8 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | C1 | Hour 1 freeze: agree DTO and engine semantics, resolve section 8 | Deliver 3 | H0.25 to H1 | all owners | todo |
 | F1 | React, Vite, TypeScript, Tailwind scaffold, versions pinned on aarch64 | Deliver 2 | H1 to H2 | none | done |
 | F2 | `DomainEngine` interface and fixture-backed engine | Deliver 3 | H1 to H4 | D1 (interim below), Q7 | done |
-| F5 | `BrowserEngine`: release index, two ONNX sessions in a worker, DTO assembly, parity. My first slice after the freeze, per the redesign | Deliver 3 | H2 to H12 | D3, Q11 | todo |
-| F6 | Template renderer, and explanation states for local and Pages | Deliver 4 | H4 to H12 | F2, D3 | active |
+| F5 | `BrowserEngine`: release index, two ONNX sessions in a worker, DTO assembly, parity. My first slice after the freeze, per the redesign | Deliver 3 | H2 to H12 | D3, Q11 | active |
+| F6 | Template renderer, and explanation states for local and Pages | Deliver 4 | H4 to H12 | F2, D3 | done, except the rendered-fixture check (D3) |
 | F3 | Case list, observations from CaseRecord, chart, assumptions and model-card panel | Deliver 2 | H2 to H8 | F2, Q13 | done, except manifest facts (Q13) |
 | F4 | `LocalApiEngine`: session, idempotent submit, polling, cancel, Problems | Deliver 3 | H4 to H12 | D4 | done against a fake; real API check waits on D4 |
 | T1 | `app/telemetry`: timings, memory, source attribution | Deliver 5 | H12 to H18 | D5, Q4 | todo |
@@ -273,6 +273,8 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 - Pages: the panel says chat is a local GX10 feature. The explanation comes from the renderer, with source `template`. It adds no numbers of its own.
 - Done when: the renderer reproduces Vinesh's `*.rendered.json` fixture byte for byte, including its rounding tie case.
 - Verify (F1): rendered-fixture test; tests for the three sources; network assertion for the Pages profile.
+- Result 2026-10-11: `web/src/engines/browser/renderTemplate.ts` and `web/src/features/explanation/ExplanationPanel.tsx`. Scenario and explanation jobs share one hook, `features/jobs/useEngineJob.ts`, so polling, cancel and stale rejection are written once. The panel goes through `DomainEngine` in both profiles; when chat is unavailable it asks a fixed question and labels the answer as a template.
+- Not done: the byte-for-byte check against Vinesh's `*.rendered.json`, which does not exist yet (D3). The renderer is tested against the contract's example template and my reading of the rules. Q14 lists where that reading could differ from his.
 
 ### T1 Telemetry
 
@@ -351,6 +353,7 @@ Still open:
 - **Q10, team.** Should authorship of the training code move to me as well, or only its execution? This plan assumes execution only (I12). A move needs the registry changed on `origin/main`; the gate's contract-drift check then forces this plan to be re-derived.
 
 - **Q11, Vinesh.** On Pages there is no Python, so the browser has to apply the admission rules that `admission_check` owns. That is a second implementation of one rule set. Can the parity fixtures include rejected requests with the expected `Problem.code`, so my check is pinned to his?
+- **Q14, Vinesh.** Three renderer details the contract text leaves open, with what I implemented. An integer such as `request.horizon_days` gets `ratio_decimals` like any other number, so the example template renders "21.00 days". A boolean renders as `true` or `false`. A `null` is not a scalar and makes the template invalid. The rendered fixture should include one of each so both renderers are pinned.
 - **Q13, Nisheeth and Vinesh.** How does the local UI read the manifests and model cards? The REST table has no route for them. Options: the monolith serves `artifacts/public/` as static files, so both profiles read the release index the same way; or a new route. I prefer the static mount, because it needs no new DTO.
 - **Q12, Vinesh.** The redesign itself notes that no graph exists yet, so nothing shows the closed-form mechanistic graph uses only operators that ONNX Runtime Web supports. I will run the first synthetic graph in the WASM runtime as soon as it is published and report the result before the freeze is relied on.
 
@@ -389,3 +392,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-11 | F2 | this commit | Correction to the row above: at commit `881d9e2` `typecheck` and the Pages build were failing, because `tests/frontend/` could not resolve `vitest` from outside `web/`. I committed without reading the exit codes. Fixed with a `paths` entry in `web/tsconfig.app.json`. Now measured with exit codes: `typecheck` 0, `lint` 0, `test` 32 passed, Pages `build` 0. | Added `npm --prefix web run check`, which chains all four and stops on the first failure. It runs before every frontend commit from here on. |
 | 2026-10-11 | F3 | this commit | `npm --prefix web run check` exit 0: typecheck, lint, 46 tests, build. Tests cover the case facts with units and the synthetic label, the ineligible-case rule, a full scenario run, a failing engine shown as a typed Problem, stale-response rejection, overlapping runs, cancel, and a failed job. In the browser the chart, hover readout and result panel rendered with the fixture; the 375 px width was not re-checked for this slice. | A test caught a real bug: a failed job's Problem was shown as `[object Object]`. Fixed before commit. |
 | 2026-10-11 | F4 | this commit | `npm --prefix web run check` exit 0 with 65 tests. New tests: one session under racing calls, session retry after a failure, a fresh `Idempotency-Key` on both POSTs and none on reads, a Problem passed through unchanged, `Retry-After` kept on 429, six status codes with unreadable bodies, a contract-breaking response reported as a fault, an unreachable API. A search of the Pages bundle for the API path, `Idempotency-Key`, `localhost`, `127.0.0.1` and `APP_` found nothing. In the browser, the local build with no API showed the Problem state. | Tested against my fake only. Nothing here shows the real API works. |
+| 2026-10-11 | F6 | this commit | `npm --prefix web run check` exit 0 with 81 tests. Renderer tests: the contract example, index and `-1` paths, `toFixed` rounding with a tie, first-match selection, six invalid placeholders, an uncovered source. Panel tests: the Pages wording and fixed explanation, the three source labels, and a failed explanation that leaves no text. | Rendered-fixture parity is not checked; no fixture exists. |
