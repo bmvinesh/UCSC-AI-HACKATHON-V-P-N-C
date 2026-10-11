@@ -121,9 +121,9 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | F1 | React, Vite, TypeScript, Tailwind scaffold, versions pinned on aarch64 | Deliver 2 | H1 to H2 | none | done |
 | F2 | `DomainEngine` interface and fixture-backed engine | Deliver 3 | H1 to H4 | D1 (interim below), Q7 | done |
 | F5 | `BrowserEngine`: release index, two ONNX sessions in a worker, DTO assembly, parity. My first slice after the freeze, per the redesign | Deliver 3 | H2 to H12 | D3, Q11 | todo |
-| F6 | Template renderer, and explanation states for local and Pages | Deliver 4 | H4 to H12 | F2, D3 | todo |
+| F6 | Template renderer, and explanation states for local and Pages | Deliver 4 | H4 to H12 | F2, D3 | active |
 | F3 | Case list, observations from CaseRecord, chart, assumptions and model-card panel | Deliver 2 | H2 to H8 | F2, Q13 | done, except manifest facts (Q13) |
-| F4 | `LocalApiEngine`: session, idempotent submit, polling, cancel, Problems | Deliver 3 | H4 to H12 | D4 | active |
+| F4 | `LocalApiEngine`: session, idempotent submit, polling, cancel, Problems | Deliver 3 | H4 to H12 | D4 | done against a fake; real API check waits on D4 |
 | T1 | `app/telemetry`: timings, memory, source attribution | Deliver 5 | H12 to H18 | D5, Q4 | todo |
 | G2 | On-device integration and measurements | Deliver 5 | H12 to H20 | D4, D6 | todo |
 | F7 | Resilience, accessibility, provenance, export | Deliver 6 | H18 to H24 | F4, F5, Q6 | todo |
@@ -246,6 +246,9 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 - Behaviour: create the session once with POST `/api/v1/session`. Send `Idempotency-Key` on scenario and explanation POSTs. Poll a job at 1 s with bounded backoff while `queued` or `running`. Cancel with POST `/api/v1/jobs/{id}/cancel`. Map 422, 404, 429 with Retry-After, 503 and 500 to typed `Problem` states. Validate every response with the generated validator. Drop any response whose request is no longer current.
 - Done when: tests with a mocked `fetch` cover success, each Problem code, cancel, stale response and 429 retry guidance, and the UI stays interactive while polling.
 - Verify (F1): `npm --prefix web test`.
+- Result 2026-10-11: `web/src/engines/local/LocalApiEngine.ts`, tested against `tests/frontend/fakeApi.ts`, an in-memory stand-in for the REST table. It passes the same conformance suite as the fixture engine. Polling, backoff and stale rejection live in `useScenarioJob` (F3), so they are identical for every engine. The local profile now selects this engine; the API client is compiled out of the Pages bundle.
+- Not verified: anything against Nisheeth's real API, which does not exist yet (D4). With no API running, the local build shows a retryable Problem and stays usable. To see the UI with data today, run the Pages profile: `VITE_PROFILE=pages npm --prefix web run dev`.
+- Assumption to confirm with Nisheeth: `POST /api/v1/session` returns 201 with a cookie and no body I need; an error response body is a `Problem`.
 
 ### F5 BrowserEngine
 
@@ -385,3 +388,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-11 | F2 | this commit | `npm test`: 32 passed in 5 files, including every example in `contracts/examples.json` against its schema, four rejected mutations, and the conformance suite on `FixtureEngine`. `typecheck` and `lint` clean. Pages build succeeds. | Types are derived locally into the ignored `web/.contracts/`; nothing derived is committed. |
 | 2026-10-11 | F2 | this commit | Correction to the row above: at commit `881d9e2` `typecheck` and the Pages build were failing, because `tests/frontend/` could not resolve `vitest` from outside `web/`. I committed without reading the exit codes. Fixed with a `paths` entry in `web/tsconfig.app.json`. Now measured with exit codes: `typecheck` 0, `lint` 0, `test` 32 passed, Pages `build` 0. | Added `npm --prefix web run check`, which chains all four and stops on the first failure. It runs before every frontend commit from here on. |
 | 2026-10-11 | F3 | this commit | `npm --prefix web run check` exit 0: typecheck, lint, 46 tests, build. Tests cover the case facts with units and the synthetic label, the ineligible-case rule, a full scenario run, a failing engine shown as a typed Problem, stale-response rejection, overlapping runs, cancel, and a failed job. In the browser the chart, hover readout and result panel rendered with the fixture; the 375 px width was not re-checked for this slice. | A test caught a real bug: a failed job's Problem was shown as `[object Object]`. Fixed before commit. |
+| 2026-10-11 | F4 | this commit | `npm --prefix web run check` exit 0 with 65 tests. New tests: one session under racing calls, session retry after a failure, a fresh `Idempotency-Key` on both POSTs and none on reads, a Problem passed through unchanged, `Retry-After` kept on 429, six status codes with unreadable bodies, a contract-breaking response reported as a fault, an unreachable API. A search of the Pages bundle for the API path, `Idempotency-Key`, `localhost`, `127.0.0.1` and `APP_` found nothing. In the browser, the local build with no API showed the Problem state. | Tested against my fake only. Nothing here shows the real API works. |
