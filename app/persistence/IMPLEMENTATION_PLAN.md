@@ -2,8 +2,8 @@
 
 Role: [`docs/roles/02-nisheeth-backend.md`](../../docs/roles/02-nisheeth-backend.md) | Rules: [`CLAUDE.md`](../../CLAUDE.md) | Contracts: [`docs/CONTRACTS.md`](../../docs/CONTRACTS.md) (schema version 1)
 Contract fingerprint: `f4bfbd58fd59`
-**Next up:** N1b (types, blocked — handoff in §7) and N2 (sessions).
-Status: **N0 and N1 done and verified (§9). Everything else not started.** MVP only: build the smallest thing that satisfies the role's acceptance list, one task at a time, and verify each before the next. A box is checked only on observed evidence.
+**Next up:** N2 (sessions). N1b (types) is blocked on Chaandan's generator — handoff R1 in §7.
+Status: **N0 and N1 done and verified (§9). N1b blocked (R1). Everything else not started.** MVP only: build the smallest thing that satisfies the role's acceptance list, one task at a time, and verify each before the next. A box is checked only on observed evidence.
 
 Lives in `app/persistence/` because `docs/**` belongs to Chaandan; this directory is Nisheeth's. (The earlier OncoVision data-prep plan was for a retired scope and is not part of this project.)
 
@@ -107,6 +107,7 @@ Handoff content when done: migration/start command, exact route fixtures, real t
 | Date | Task | Change | Verification (command → actual result) |
 | --- | --- | --- | --- |
 | 2026-10-11 | N0 | Plan, `tests/persistence/check_dev2.py` (+ `test_check_dev2.py`), nested `CLAUDE.md` in `app/persistence`, `app/routes`, `tests/persistence` | `python3 -m unittest discover -s tests/persistence` → `Ran 11 tests ... OK`. `check_dev2.py audit --base origin/main` → `Result: PASS`; with a probe file `web_probe.ts` → `PROBLEM: ... outside Dev 2's writable boundary` and `Result: FAIL` (probe removed). |
+| 2026-10-11 | N1 | `app/persistence/{db.py,migrations.py,migrations/001_initial.sql}`, `tests/persistence/test_db_foundation.py`. A test caught a real bug in my first statement splitter (two statements on one line); fixed by splitting at `;` and added an edge-case test. | `python3 -m unittest discover -s tests/persistence` → `Ran 30 tests ... OK` (covers: WAL/FK/busy_timeout pragmas, commit/rollback, WAL reader not blocked by an open writer, second writer gets busy error, fresh migrate + idempotent re-run, newer-DB refusal, failed migration rolled back with version kept, numbering validation, trigger/semicolon/comment handling, job-state CHECKs, FK/JSON/STRICT enforcement, per-session idempotency uniqueness, hot queries use their indexes via EXPLAIN QUERY PLAN). **Not verified:** behaviour on the GX10 (aarch64, its SQLite/Python versions); SQLite older than 3.37 (rejection path only simulated); migration 001 against future contract changes. |
 
 ## 10. Decisions
 
