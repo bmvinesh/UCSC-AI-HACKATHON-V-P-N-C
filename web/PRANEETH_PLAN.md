@@ -124,10 +124,10 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | F6 | Template renderer, and explanation states for local and Pages | Deliver 4 | H4 to H12 | F2, D3 | done, except the rendered-fixture check (D3) |
 | F3 | Case list, observations from CaseRecord, chart, assumptions and model-card panel | Deliver 2 | H2 to H8 | F2, Q13 | done, except manifest facts (Q13) |
 | F4 | `LocalApiEngine`: session, idempotent submit, polling, cancel, Problems | Deliver 3 | H4 to H12 | D4 | done against a fake; real API check waits on D4 |
-| T1 | `app/telemetry`: timings, memory, source attribution | Deliver 5 | H12 to H18 | D5 | active |
+| T1 | `app/telemetry`: timings, memory, source attribution | Deliver 5 | H12 to H18 | D5 | done (module); measurements are G2 |
 | G2 | On-device integration and measurements | Deliver 5 | H12 to H20 | D4, D6 | todo |
 | F7 | Resilience, accessibility, provenance, export | Deliver 6 | H18 to H24 | F4, F5, Q6 | todo |
-| R1 | Pages base path, hash routing, local build, offline local start | Deliver 6 | H12 to T-3h | D7 | todo |
+| R1 | Pages base path, hash routing, local build, offline local start | Deliver 6 | H12 to T-3h | D7 | active |
 
 Verify commands marked (F1) are npm scripts that F1 creates. They do not exist yet.
 
@@ -282,6 +282,8 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 
 - Files: `app/telemetry/**`, `tests/hardware/**`. Scope depends on Q4.
 - Captures cold and warm timings, memory, and which component produced each number. A missing probe is reported as "not measured". I add no route; exposure goes through Nisheeth's wiring.
+- Result 2026-10-11: `app/telemetry/measure.py` with `time_call` (cold call, then warm median, with an optional device synchronize), `memory_snapshot` (host memory from `/proc/meminfo`, this process's PyTorch CUDA memory) and `write_report` (JSON evidence that lists what was not measured). Standard library only, so the tests run with `unittest` and need no new package. The GX10 shares one memory pool between CPU and GPU and its driver reports no GPU total, so host `MemAvailable` is the mixed-load figure.
+- Not done: the measurements themselves on the real app and probe. That is G2, which waits on D4 and D6.
 
 ### G2 On-device integration and measurements
 
@@ -397,3 +399,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-11 | F4 | this commit | `npm --prefix web run check` exit 0 with 65 tests. New tests: one session under racing calls, session retry after a failure, a fresh `Idempotency-Key` on both POSTs and none on reads, a Problem passed through unchanged, `Retry-After` kept on 429, six status codes with unreadable bodies, a contract-breaking response reported as a fault, an unreachable API. A search of the Pages bundle for the API path, `Idempotency-Key`, `localhost`, `127.0.0.1` and `APP_` found nothing. In the browser, the local build with no API showed the Problem state. | Tested against my fake only. Nothing here shows the real API works. |
 | 2026-10-11 | F6 | this commit | `npm --prefix web run check` exit 0 with 81 tests. Renderer tests: the contract example, index and `-1` paths, `toFixed` rounding with a tie, first-match selection, six invalid placeholders, an uncovered source. Panel tests: the Pages wording and fixed explanation, the three source labels, and a failed explanation that leaves no text. | Rendered-fixture parity is not checked; no fixture exists. |
 | 2026-10-11 | F5 | this commit | `npm --prefix web run check` exit 0 with 107 tests. Browser-engine tests: a full release loads clean; only listed files are requested; a tampered model disables one engine with a reason; the contract's example index degrades instead of failing; a bad index is a retryable Problem; both tensor layouts carry raw values; the source table for both engines; NaN, negative and short outputs fail the job; a worker failure; cancel during a run; six admission rejections; the template explanation. | No ONNX graph has been run in a browser. The worker and parity are not built. Slice blocked on D3. |
+| 2026-10-11 | T1 | this commit | `.venv/bin/python -m unittest discover -s tests/hardware -p 'test_*.py'`: 8 tests OK. One real reading on the GX10 through the module: a 2048 float32 matmul on CUDA, cold 0.153 s, warm median 0.0013 s, synchronized; host memory and this process's CUDA memory all measured. | The module is not wired to anything. No app or model was measured. |
