@@ -127,7 +127,7 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | T1 | `app/telemetry`: timings, memory, source attribution | Deliver 5 | H12 to H18 | D5 | done (module); measurements are G2 |
 | G2 | On-device integration and measurements | Deliver 5 | H12 to H20 | D4, D6 | todo |
 | F7 | Resilience, accessibility, provenance, export | Deliver 6 | H18 to H24 | F4, F5, Q6 | todo |
-| R1 | Pages base path, hash routing, local build, offline local start | Deliver 6 | H12 to T-3h | D7 | active |
+| R1 | Pages base path, hash routing, local build, offline local start | Deliver 6 | H12 to T-3h | D3, D4, D7 | blocked; my part verified |
 
 Verify commands marked (F1) are npm scripts that F1 creates. They do not exist yet.
 
@@ -301,6 +301,9 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 - Files: `web/vite.config.ts` and build-related files under `web/`. Chaandan owns the Pages workflow and export script and asks me for Vite changes.
 - Done when: the Pages build works under `/UCSC-AI-HACKATHON-V-P-N-C/`; hash routes survive reload and deep links; ONNX, preprocessing and WASM paths resolve under the base; the local build is served at `/` by the monolith; local start works with the network disabled, with nothing loaded from a CDN.
 - Verify (F1): build both profiles; serve the Pages bundle under the subpath; search the bundle for `localhost`, `127.0.0.1`, `APP_` and key-like strings.
+- Result 2026-10-11, my part: the Pages build was served with `vite preview` under `/UCSC-AI-HACKATHON-V-P-N-C/`. The deep link `#/model` loaded directly and survived a reload; the page made three requests in total, all static files under the base path; the console was clean; nothing is loaded from a CDN. The external URLs that appear in the bundle are schema identifier strings, and the network log confirms none is fetched.
+- Still open, each waiting on someone else: ONNX and WASM paths under the base (needs F5's worker, D3); the local build served at `/` by the monolith and the offline start (D4); the Pages workflow itself (D7).
+- Handoff to Chaandan: build with `VITE_PROFILE=pages VITE_BASE_PATH=/UCSC-AI-HACKATHON-V-P-N-C/ npm --prefix web run build`; output is `web/dist/`; `npm --prefix web ci` installs from the lockfile; `npm --prefix web run check` is the gate for CI.
 
 ## 6. Dependencies and requests
 
@@ -400,3 +403,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-11 | F6 | this commit | `npm --prefix web run check` exit 0 with 81 tests. Renderer tests: the contract example, index and `-1` paths, `toFixed` rounding with a tie, first-match selection, six invalid placeholders, an uncovered source. Panel tests: the Pages wording and fixed explanation, the three source labels, and a failed explanation that leaves no text. | Rendered-fixture parity is not checked; no fixture exists. |
 | 2026-10-11 | F5 | this commit | `npm --prefix web run check` exit 0 with 107 tests. Browser-engine tests: a full release loads clean; only listed files are requested; a tampered model disables one engine with a reason; the contract's example index degrades instead of failing; a bad index is a retryable Problem; both tensor layouts carry raw values; the source table for both engines; NaN, negative and short outputs fail the job; a worker failure; cancel during a run; six admission rejections; the template explanation. | No ONNX graph has been run in a browser. The worker and parity are not built. Slice blocked on D3. |
 | 2026-10-11 | T1 | this commit | `.venv/bin/python -m unittest discover -s tests/hardware -p 'test_*.py'`: 8 tests OK. One real reading on the GX10 through the module: a 2048 float32 matmul on CUDA, cold 0.153 s, warm median 0.0013 s, synchronized; host memory and this process's CUDA memory all measured. | The module is not wired to anything. No app or model was measured. |
+| 2026-10-11 | R1 | this commit | Pages build served under the repository sub-path: deep link and reload work, 3 same-origin static requests, clean console. | No slice is active. Everything left waits on D1, D3, D4, D6, D7, D10 or D11. Sixteen commits on `dev/praneeth-ui-gx10` are unpushed: the token on this machine still gets HTTP 403. |
