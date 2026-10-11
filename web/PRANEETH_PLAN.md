@@ -2,7 +2,7 @@
 
 Working plan for Dev 1 (Praneeth). It turns the [role contract](../docs/roles/01-praneeth-frontend-gx10.md) into ordered, verifiable slices. It does not restate or override the contract: on any conflict the sources in section 2 win and this file gets fixed.
 
-- Contract baseline commit: `ab8b6f34b96708f1390367da1ee81f9fc86d4998` (Vinesh's boundary redesign, `feat/vinesh-boundary-redesign`, 2026-10-10). Praneeth confirmed on 2026-10-10 that the team follows this flow. Until `origin/main` contains that commit, this checkout sets `git config gate.baseRef origin/feat/vinesh-boundary-redesign`, which the gate and both hooks read. Remove it with `git config --unset gate.baseRef` once `main` has the redesign.
+- Contract baseline commit: `7d6cb3285e5e73bb71461b0ef51285a6a40dc747` (`origin/main`, 2026-10-11: the merge of Vinesh's boundary redesign, pull request 1). The gate compares against `origin/main` by default; a temporary base can be set with `git config gate.baseRef`.
 - Role branch: `dev/praneeth-ui-gx10`
 - Gate: `scripts/gx10/change_gate.sh`, run before and after every change
 - Automatic runs: `scripts/gx10/install_gate_hooks.sh` installs a git pre-commit hook and a Claude Code edit hook in local, untracked files, so the gate runs after every agent edit and blocks a failing commit
@@ -118,8 +118,8 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | M3 | Training run harness, then the runs | Deliver 5 | H2 to H12 | E1, M2, D11 | blocked |
 | M4 | Export run and on-device parity run | Deliver 5 | H8 to H18 | M3, D3 | todo |
 | C1 | Hour 1 freeze: agree DTO and engine semantics, resolve section 8 | Deliver 3 | H0.25 to H1 | all owners | todo |
-| F1 | React, Vite, TypeScript, Tailwind scaffold, versions pinned on aarch64 | Deliver 2 | H1 to H2 | none | active |
-| F2 | `DomainEngine` interface and fixture-backed engine | Deliver 3 | H1 to H4 | D1, Q7 | todo |
+| F1 | React, Vite, TypeScript, Tailwind scaffold, versions pinned on aarch64 | Deliver 2 | H1 to H2 | none | done |
+| F2 | `DomainEngine` interface and fixture-backed engine | Deliver 3 | H1 to H4 | D1 (interim below), Q7 | active |
 | F5 | `BrowserEngine`: release index, two ONNX sessions in a worker, DTO assembly, parity. My first slice after the freeze, per the redesign | Deliver 3 | H2 to H12 | D3, Q11 | todo |
 | F6 | Template renderer, and explanation states for local and Pages | Deliver 4 | H4 to H12 | F2, D3 | todo |
 | F3 | Case list, observations from CaseRecord, chart, assumptions and model-card panel | Deliver 2 | H2 to H8 | F2 | todo |
@@ -224,6 +224,8 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 
 - `JobRecord.result_id` is a `ScenarioResult` id for a scenario job and an `ExplanationResult` id for an explanation job. `Capabilities` carries one version per engine plus `degraded_reasons`.
 
+- Interim for D1, decided by Praneeth on 2026-10-10: until Chaandan's generated clients exist, `web/scripts/derive-contracts.mjs` derives TypeScript types from `contracts/*.json` into the git-ignored `web/.contracts/`, using `json-schema-to-typescript`, the tool Chaandan's plan names. Runtime validation compiles the source schemas with Ajv. Nothing derived is committed and no DTO is written by hand. All code imports types and validators through `web/src/contracts/`, so moving to `web/src/generated/**` changes that one folder.
+- Schema validation covers shape only. The semantic rules (job terminal fields, paired bands, day grid) belong to the contract's validators; I do not re-encode them in the UI.
 - Import rule: features depend on the interface only. They never import a concrete engine, `fetch`, or the ONNX runtime. Engines depend on generated DTOs.
 - Done when: the UI can run end to end on synthetic fixtures; every payload passes the generated validator; fixtures are read from the contract source, not copied into `web/`.
 - Verify (F1): `npm --prefix web run typecheck`, `npm --prefix web test`.
@@ -375,3 +377,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-11 | M1 | this commit | `models.sh status` exits 0 with `ok qwen3.6:35b`. Against a temporary lock with a wrong digest and an absent model it printed `mismatch` and `missing` and exited 1. `fetch` with nothing missing pulled nothing. The `ollama serve` process ID stayed 2142. | No model download was needed. M2 is blocked on Vinesh's source list (D10). |
 | 2026-10-11 | M3 | this commit | `tests/hardware/run_harness_test.sh`: 17 checks passed (success, failure, missing output, record present while running, second run refused, interrupt, bad label, dirty tree refused). | Harness only. No training has been run. Blocked on D10 and D11. |
 | 2026-10-11 | F1 | this commit | On the GX10 after `npm ci` from the lockfile: `typecheck` clean, `lint` exit 0, `test` 5 passed, `build` succeeded for both profiles. The Pages build references assets under `/UCSC-AI-HACKATHON-V-P-N-C/`; a search of that bundle for `localhost`, `127.0.0.1`, `APP_`, the Ollama port and the model name found nothing. In the dev server the shell rendered at desktop and 375 px widths, the `#/model` deep link loaded directly, and the console had no errors. | Shell only: it states that no case, model or result is loaded. F2 needs generated DTOs (D1). |
+| 2026-10-11 | F1 | `8ba24b3` | `origin/main` now holds the redesign (`7d6cb32`, merged by Chaandan). Merged it into the role branch with no conflicts; the gate passes against `origin/main` and the temporary `gate.baseRef` is removed. | F1 done. F2 starts with the D1 interim. |
