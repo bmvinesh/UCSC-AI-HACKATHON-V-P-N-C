@@ -111,8 +111,8 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | ID | Slice | Contract | Window | Needs | Status |
 | --- | --- | --- | --- | --- | --- |
 | S0 | Plan, change gate, role branch | Workflow | H0 | none | done |
-| G1 | GX10 and Qwen runtime inventory, read-only | Deliver 1 | H0 to H1 | none | active |
-| E1 | Python and CUDA environment on the GX10, proposed pins | Deliver 1, 5 | H0 to H2 | none | todo |
+| G1 | GX10 and Qwen runtime inventory, read-only | Deliver 1 | H0 to H1 | none | done |
+| E1 | Python and CUDA environment on the GX10, proposed pins | Deliver 1, 5 | H0 to H2 | none | active |
 | M1 | Model and runtime assets: verify what is installed, fetch only what is missing | Deliver 1 | H0 to H2 | G1, Q9 | todo |
 | M2 | Dataset fetch with checksums | Deliver 5 | H1 to H4 | D10 | todo |
 | M3 | Training run harness, then the runs | Deliver 5 | H2 to H12 | E1, M2, D11 | todo |
@@ -144,7 +144,8 @@ Verify commands marked (F1) are npm scripts that F1 creates. They do not exist y
 - Verify: run the script twice and compare; confirm no process was restarted; search the output for token-like strings.
 - Already observed on this machine, read-only, 2026-10-10: aarch64; 20 cores; 121 GiB RAM, shared with the GPU; NVIDIA GB10, driver 580.142 (`nvidia-smi` reports GPU memory as N/A); 614 GB free on `/`; Node v24.15.0; npm 11.12.1; Python 3.12.3; git 2.43.0.
 - Qwen, observed read-only the same day: Ollama 0.23.2 listens on `127.0.0.1:11434` and lists `qwen3.6:35b` (36.0B parameters, Q4_K_M, GGUF, 23 GB). No model was loaded at the time. `~/unsloth` also holds a Qwen3.6-35B-A3B GGUF at UD-Q4_K_XL for llama.cpp. Nothing named Qwen 3.8 27B is installed (Q9).
-- Not yet done: a loopback completion, load time, memory while loaded, and what listens on `127.0.0.1:11000`.
+- Measured 2026-10-11 with `scripts/gx10/inventory.sh --completion`: cold completion 51.1 s wall, of which 50.1 s is model load; warm completion 0.27 s; the loaded model occupies 34.6 GB; available memory fell from 110 to 72 GiB; Ollama unloads it after about 5 minutes idle. The Ollama process ID was 2142 before and after. `127.0.0.1:11000` is the NVIDIA DGX Dashboard, not a model runtime.
+- Handoff to Nisheeth and Vinesh (no secret involved): `APP_QWEN_BASE_URL=http://127.0.0.1:11434`, with the OpenAI-compatible API under `/v1`; `APP_QWEN_MODEL_ID=qwen3.6:35b`; `APP_QWEN_API_KEY` stays empty. The 20 s default in `APP_QWEN_TIMEOUT_SECONDS` is shorter than a cold load, so the first explanation after idle will time out and fall back to a template unless the model is warmed and kept loaded (request D13).
 
 ### E1 Python and CUDA environment
 
@@ -297,6 +298,7 @@ What I need from other owners. Each is a request, never an edit by me.
 | D10 | Exact source list to download: URLs, versions, licence, expected files and sizes | Vinesh | M2 | E1, M1 |
 | D11 | Training and export entrypoints in `modeling/**` with config and seed arguments | Vinesh | M3, M4 real runs | Build and test the harness with a dummy command |
 | D12 | Root `pyproject.toml` and lockfile pins taken from my E1 proof | Chaandan | Clean-clone reproducibility | Local `.venv/` |
+| D13 | Decide how Qwen stays warm: a keep-alive set by the adapter, a warm-up call at app start, or a longer timeout. A cold load took 50 s against a 20 s default timeout | Vinesh (adapter), Nisheeth (settings) | First explanation after idle | I can warm it by hand before a demo with `inventory.sh --completion` |
 
 Draft for D9, to be added to `docs/roles/README.md` by Chaandan. I do not edit that file.
 
@@ -361,3 +363,4 @@ Append only. One row per finished slice or notable event.
 | 2026-10-10 | S0 | not committed | `scripts/gx10/change_gate.sh` exits 0 on the role branch with 4 owned paths. It exited 1 on each of 7 deliberate violations: another owner's path, a generated client, an owned root without a pointer, a secret-like `VITE_*` name, two active slices, zero active slices, and a baseline older than the contract on `origin/main`. `bash -n` passes. shellcheck is not installed, so it was not run. | Files await Praneeth's go-ahead to commit. No git identity is configured on this machine. S0 stays `active` until that commit exists. |
 | 2026-10-10 | S0 | not committed | Re-derived against the boundary redesign `ab8b6f3`. `pytest tests/contracts` on that commit: 19 passed. Gate extended with checks 6 and 7 and exits 0 with `BASE_REF=origin/feat/vinesh-boundary-redesign`. It exited 1 on each of: a path under `modeling/`, a 6 MB file, a token-like literal, a secret-like `VITE_*` name, an `.onnx` file under `web/`. A `.pt` file is not seen by the gate because `.gitignore` already excludes it. With the default base the gate fails, as expected, until `origin/main` contains the redesign. `install_gate_hooks.sh` installed the pre-commit hook and the Claude Code edit hook. | Added GX10 operation slices E1, M1 to M4 and section 3a. Read-only inventory found no PyTorch or ONNX on the machine and `qwen3.6:35b` served by Ollama (Q9). A git identity is now configured. |
 | 2026-10-10 | S0 | `9134d9a` | Committed on `dev/praneeth-ui-gx10`. Push to `origin` was refused with HTTP 403: the token on this machine cannot write to the repository. Gate base is now read from local `git config gate.baseRef`. | S0 done. `main` still at `381c0a2`; Praneeth to push after re-authenticating. |
+| 2026-10-11 | G1 | this commit | `scripts/gx10/inventory.sh` run twice gave identical output. `--completion` returned the expected reply cold and warm; timings and memory are in the G1 notes. No process was restarted. Output searched for token-like strings: none. Also fixed the Claude Code edit hook to resolve the repository from the working directory. | Raw output is in the ignored `runtime/gx10/`. |

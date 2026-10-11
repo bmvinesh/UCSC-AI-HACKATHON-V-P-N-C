@@ -32,6 +32,7 @@ if [[ -e $settings ]]; then
     echo "NOTE: $settings exists without the gate hook; add it by hand" >&2
 else
   mkdir -p .claude
+  # Resolved from the working directory, so it follows a session that changes folder.
   # Exit 2 hands the gate's stderr back to the agent instead of hiding it.
   cat >"$settings" <<EOF
 {
@@ -42,7 +43,7 @@ else
         "hooks": [
           {
             "type": "command",
-            "command": "\"\$CLAUDE_PROJECT_DIR\"/$GATE || exit 2"
+            "command": "r=\$(git rev-parse --show-toplevel 2>/dev/null) || exit 0; [ -x \"\$r/$GATE\" ] || exit 0; \"\$r/$GATE\" || exit 2"
           }
         ]
       }
