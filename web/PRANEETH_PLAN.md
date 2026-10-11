@@ -127,7 +127,7 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 | T1 | `app/telemetry`: timings, memory, source attribution | Deliver 5 | H12 to H18 | D5 | done (module); measurements are G2 |
 | G2 | On-device integration and measurements | Deliver 5 | H12 to H20 | D4, D6 | todo |
 | F7 | Resilience, accessibility, provenance, export | Deliver 6 | H18 to H24 | F4, F5, Q6 | todo |
-| H1 | Handoff file for Vinesh listing what blocks the GX10 and the frontend | Workflow | now | none | active |
+| H1 | Handoff file for Vinesh listing what blocks the GX10 and the frontend | Workflow | now | none | done |
 | R1 | Pages base path, hash routing, local build, offline local start | Deliver 6 | H12 to T-3h | D3, D4, D7 | blocked; my part verified |
 
 Verify commands marked (F1) are npm scripts that F1 creates. They do not exist yet.
