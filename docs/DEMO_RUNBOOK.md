@@ -3,10 +3,10 @@
 ## Before release lock
 
 - [ ] Source table/license hashes, patient exclusions/split counts, actual drug exposure and eligible horizon recorded.
-- [ ] Model/scaler/ONNX manifest match; checksum and parity tests pass; public artifact within Git/Pages limits.
+- [ ] Release index hashes match both artifact sets; Python and browser DTO-level parity fixtures pass; public artifacts within Git/Pages limits.
 - [ ] Three named demonstration cases (reduce/increase/limited data) selected from allowed development/demo data, not cherry-picked to tune locked test metrics; synthetic cases visibly marked.
 - [ ] Hash-keyed cached scenario seeds for exact demo requests available; no approximation to unsupported inputs disguised as a cache hit.
-- [ ] Stable template explanations from facts and approved source snippets available without Qwen.
+- [ ] Template explanations (data file, rendered identically by Python and browser) available without Qwen; knowledge snippets only if a reviewed `knowledge` file is in the release index.
 - [ ] Installed Qwen endpoint/model discovered and a small loopback completion checked; no credentials logged/committed.
 - [ ] GX10 warmup, local build, GPU timing and mixed-load memory measured; model work independent of Qwen.
 - [ ] Pages base `/UCSC-AI-HACKATHON-V-P-N-C/`, hash routing, ONNX/scaler/WASM paths and reloads verified with empty cache. No localhost probing/chat call from Pages.

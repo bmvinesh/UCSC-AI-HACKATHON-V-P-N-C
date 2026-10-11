@@ -6,8 +6,8 @@ Own the React experience and direct GX10 operation with your installed Claude Co
 
 1. Inventory GX10 and installed Qwen runtime; discover local endpoint/served ID/quantization without replacing a working installation. Supply settings to Nisheeth without committing secrets. Agree one hardware-test window at a time.
 2. Create exported React/Tailwind UI scaffold, reviewed locally. Implement case list, baseline observations, empirical forecast, clearly separate mechanistic what-if comparison, assumptions/model-card panel and responsive chart.
-3. Define/use `LocalApiEngine` and `BrowserEngine` against generated DTOs. Poll local jobs; perform ONNX inference in a worker with versioned transforms. No duplicated numerical logic in components.
-4. Add local explanation progress/cached/template states; Pages chat unavailable label and deterministic current-result explanation. Never call localhost from Pages.
+3. Define/use `LocalApiEngine` and `BrowserEngine` against generated DTOs. Poll local jobs. In the worker, load the release index, verify hashes, and run the empirical and mechanistic ONNX graphs with raw volumes/days (all transforms are inside the graphs). Assemble results with the source table in `CONTRACTS.md` and pass Vinesh's parity fixtures. Draw observed points from CaseRecord only. No numerical logic in components or workers.
+4. Add local explanation progress/cached/template states; Pages chat unavailable label and deterministic current-result explanation via the shared template file and renderer rules (must match the rendered fixture). Never call localhost from Pages.
 5. Integrate Vinesh's real CUDA/ONNX probe and Nisheeth's monolith on GX10. Capture cold/warm timings, actual memory/source attribution, same-workload CPU/GPU comparison and Qwen degradation.
 6. Work with Chaandan on repository base path/hash routing and local build. Finish accessibility, readable provenance, cancel/retry/stale response handling, tested export and offline local startup.
 
