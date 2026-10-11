@@ -2,7 +2,7 @@
 
 Working plan for Dev 1 (Praneeth). It turns the [role contract](../docs/roles/01-praneeth-frontend-gx10.md) into ordered, verifiable slices. It does not restate or override the contract: on any conflict the sources in section 2 win and this file gets fixed.
 
-- Contract baseline commit: `ab8b6f34b96708f1390367da1ee81f9fc86d4998` (Vinesh's boundary redesign, `feat/vinesh-boundary-redesign`, 2026-10-10). Praneeth confirmed on 2026-10-10 that the team follows this flow. Until `origin/main` contains that commit, run the gate as `BASE_REF=origin/feat/vinesh-boundary-redesign scripts/gx10/change_gate.sh`.
+- Contract baseline commit: `ab8b6f34b96708f1390367da1ee81f9fc86d4998` (Vinesh's boundary redesign, `feat/vinesh-boundary-redesign`, 2026-10-10). Praneeth confirmed on 2026-10-10 that the team follows this flow. Until `origin/main` contains that commit, this checkout sets `git config gate.baseRef origin/feat/vinesh-boundary-redesign`, which the gate and both hooks read. Remove it with `git config --unset gate.baseRef` once `main` has the redesign.
 - Role branch: `dev/praneeth-ui-gx10`
 - Gate: `scripts/gx10/change_gate.sh`, run before and after every change
 - Automatic runs: `scripts/gx10/install_gate_hooks.sh` installs a git pre-commit hook and a Claude Code edit hook in local, untracked files, so the gate runs after every agent edit and blocks a failing commit
@@ -110,8 +110,8 @@ Status is the last column: `todo`, `active`, `blocked` or `done`. Windows are th
 
 | ID | Slice | Contract | Window | Needs | Status |
 | --- | --- | --- | --- | --- | --- |
-| S0 | Plan, change gate, role branch | Workflow | H0 | none | active |
-| G1 | GX10 and Qwen runtime inventory, read-only | Deliver 1 | H0 to H1 | none | todo |
+| S0 | Plan, change gate, role branch | Workflow | H0 | none | done |
+| G1 | GX10 and Qwen runtime inventory, read-only | Deliver 1 | H0 to H1 | none | active |
 | E1 | Python and CUDA environment on the GX10, proposed pins | Deliver 1, 5 | H0 to H2 | none | todo |
 | M1 | Model and runtime assets: verify what is installed, fetch only what is missing | Deliver 1 | H0 to H2 | G1, Q9 | todo |
 | M2 | Dataset fetch with checksums | Deliver 5 | H1 to H4 | D10 | todo |
@@ -360,3 +360,4 @@ Append only. One row per finished slice or notable event.
 | --- | --- | --- | --- | --- |
 | 2026-10-10 | S0 | not committed | `scripts/gx10/change_gate.sh` exits 0 on the role branch with 4 owned paths. It exited 1 on each of 7 deliberate violations: another owner's path, a generated client, an owned root without a pointer, a secret-like `VITE_*` name, two active slices, zero active slices, and a baseline older than the contract on `origin/main`. `bash -n` passes. shellcheck is not installed, so it was not run. | Files await Praneeth's go-ahead to commit. No git identity is configured on this machine. S0 stays `active` until that commit exists. |
 | 2026-10-10 | S0 | not committed | Re-derived against the boundary redesign `ab8b6f3`. `pytest tests/contracts` on that commit: 19 passed. Gate extended with checks 6 and 7 and exits 0 with `BASE_REF=origin/feat/vinesh-boundary-redesign`. It exited 1 on each of: a path under `modeling/`, a 6 MB file, a token-like literal, a secret-like `VITE_*` name, an `.onnx` file under `web/`. A `.pt` file is not seen by the gate because `.gitignore` already excludes it. With the default base the gate fails, as expected, until `origin/main` contains the redesign. `install_gate_hooks.sh` installed the pre-commit hook and the Claude Code edit hook. | Added GX10 operation slices E1, M1 to M4 and section 3a. Read-only inventory found no PyTorch or ONNX on the machine and `qwen3.6:35b` served by Ollama (Q9). A git identity is now configured. |
+| 2026-10-10 | S0 | `9134d9a` | Committed on `dev/praneeth-ui-gx10`. Push to `origin` was refused with HTTP 403: the token on this machine cannot write to the repository. Gate base is now read from local `git config gate.baseRef`. | S0 done. `main` still at `381c0a2`; Praneeth to push after re-authenticating. |

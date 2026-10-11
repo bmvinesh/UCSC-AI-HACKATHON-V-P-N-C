@@ -6,7 +6,8 @@
 # Reads git state only: it never fetches, stages or modifies anything.
 set -euo pipefail
 
-BASE_REF="${BASE_REF:-origin/main}"
+# Base branch: BASE_REF, else the local `git config gate.baseRef`, else origin/main.
+BASE_REF="${BASE_REF:-$(git config --get gate.baseRef || echo origin/main)}"
 PLAN="web/PRANEETH_PLAN.md"
 OWNED_ROOTS=(web app/telemetry scripts/gx10 tests/frontend tests/hardware)
 # A change to any of these means the plan must be re-read and re-derived.
