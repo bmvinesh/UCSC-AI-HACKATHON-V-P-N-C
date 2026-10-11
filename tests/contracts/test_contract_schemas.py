@@ -58,6 +58,7 @@ NEGATIVE = {
     "C7 observed curve": ("ScenarioResult", lambda e: {
         **e, "curves": [{**e["curves"][0], "evidence": "observed"}]}),
     "C25 fractional horizon": ("ScenarioRequest", lambda e: {**e, "horizon_days": 21.5}),
+    "C31 two curves": ("ScenarioResult", lambda e: {**e, "curves": e["curves"] * 2}),
 }
 
 

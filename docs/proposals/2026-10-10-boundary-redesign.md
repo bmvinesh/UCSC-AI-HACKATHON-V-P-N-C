@@ -1,6 +1,6 @@
 # OncoGrowth boundary redesign: proposal from Vinesh (Dev 3)
 
-Status: **proposal, not agreed.** Base: `origin/main` @ `381c0a2`. This branch (`feat/vinesh-boundary-redesign`) is the exact patch for other owners' files: [contracts/](../../contracts/), [CONTRACTS.md](../CONTRACTS.md), [DATA_AND_MODEL.md](../DATA_AND_MODEL.md), the role files, the master plan, the judge overview, the runbook and `.env.example`. Nothing reaches `main` until the owners named in §3 accept their rows and Chaandan merges. `tests/contracts/test_contract_schemas.py` validates every example and one negative case per resolved shape contradiction.
+Status: **agreed and merged** in PR #1 (`7d6cb32`, 2026-10-10), approved by Praneeth, Nisheeth and Chaandan. Post-merge amendments C29–C36 are in §8. Original status line: proposal, not agreed. Base: `origin/main` @ `381c0a2`. This branch (`feat/vinesh-boundary-redesign`) is the exact patch for other owners' files: [contracts/](../../contracts/), [CONTRACTS.md](../CONTRACTS.md), [DATA_AND_MODEL.md](../DATA_AND_MODEL.md), the role files, the master plan, the judge overview, the runbook and `.env.example`. Nothing reaches `main` until the owners named in §3 accept their rows and Chaandan merges. `tests/contracts/test_contract_schemas.py` validates every example and one negative case per resolved shape contradiction.
 
 ## 0. Design brief I worked from (the metaprompt)
 
@@ -149,7 +149,8 @@ Nothing else crosses an owner boundary. Telemetry (Praneeth) reads logs and metr
 ```python
 def load_release(index_path: Path) -> Release: ...
     # verifies schemas and sha256; Release.engines[e].available / .version / .reason -> Capabilities
-def admission_check(req: ScenarioRequest, case: CaseRecord, release: Release) -> Problem | None: ...
+def admission_check(req: ScenarioRequest, case: CaseRecord | None, release: Release,
+                    trace_id: str) -> Problem | None: ...   # trace_id: C32
     # pure; Nisheeth calls it at admission (fast 422), my handler calls it again (same function)
 def make_supervisor(cfg: ExecutorConfig, store: JobStore, cache: ResultCache,
                     release: Release, qwen: QwenConfig) -> Supervisor: ...
@@ -175,7 +176,7 @@ class JobStore(Protocol):                 # implemented in app/persistence (Nish
     def fail(self, job_id: UUID, worker: str, problem: Problem) -> None: ...
     def confirm_cancelled(self, job_id: UUID, worker: str) -> None: ...
     def fail_interrupted(self, now: datetime) -> int: ...
-        # startup: all running -> failed INTERRUPTED; periodic: expired leases -> failed INTERRUPTED
+        # fails running jobs with lease_expires_at <= now; startup passes now + lease_s (C36)
 
 class ResultCache(Protocol):
     def get(self, key: str) -> dict | None: ...
@@ -230,3 +231,18 @@ What this verification doesn't cover:
 - **Shape only.** It checks schema shape, not the semantic invariants: day 0 = baseline, `lower ≤ volume ≤ upper`, job-state field rules. Those need the semantic validators.
 - **No ONNX built yet.** No graph exists, so nothing has shown that the manifest I/O matches a real exported graph, or that the closed-form mechanistic graph exports to ONNX ops that ONNX Runtime Web supports. Vinesh's first slice has to prove that before the freeze is relied on.
 - **No owner agreement yet.** The doc edits on this branch are proposals until §6 step 3.
+
+## 8. Post-merge amendments (C29–C36)
+
+Found while turning the merged contract into implementation cards. Each fixes a gap or an inconsistency; none changes product scope. The same accept/object flow applies: each owner checks only the rows in their column.
+
+| # | Problem | Resolution | Who changes / approves |
+|---|---|---|---|
+| C29 | `examples.json` broke the contract's own rules: a mechanistic `ScenarioResult` and `ParityFixture` had `source=synthetic` and `band_kind=none` (table: `mechanistic` / `sensitivity`); a 21-day curve had 2 points (C25 grid needs 22); request `model_version` `synthetic-fixture-v1` did not match manifest `mech-fixture-v1`. My error in PR #1; schema tests cannot catch semantics | Examples corrected (horizon 3, 4 grid points, sensitivity band, matching versions). New `tests/contracts/test_example_semantics.py` checks these cross-field rules on the examples | Chaandan |
+| C30 | "Day 0 equals baseline" is unattainable in a float32 graph: `(V0+eps)-eps` is not bit-equal to `V0` | Equal within the engine manifest's `parity_tolerance` | Chaandan, Praneeth, me |
+| C31 | Nothing said how many curves a result has, so the UI and both runtimes could disagree on drug-on/off comparisons | Exactly one curve, for the requested intervention; a comparison is two requests (two cache keys, two jobs). Schema `maxItems: 1` on `ScenarioResult.curves` and parity `expected_curves` | Praneeth, Chaandan |
+| C32 | `admission_check` returns `Problem`, but `Problem.trace_id` is required and the pure function has no trace id | Takes `trace_id: str` | Nisheeth |
+| C33 | Cancel of a *running* compute job and a crashed worker process were undefined | Cancel is honoured before start or when the result returns (result discarded, job `cancelled`); no mid-inference interruption. A dead worker process makes its job `failed/INTERRUPTED` | Nisheeth, Praneeth (UI: running-cancel can take as long as one inference) |
+| C34 | ONNX opset unspecified, so the browser runtime might not load the graphs | Opset 17, float32 | Praneeth (confirm onnxruntime-web version) |
+| C35 | The contract suite cannot test lease expiry without sleeping | Each `JobStore` implementation takes `clock: Callable[[], datetime]` in its constructor (not part of the Protocol) | Nisheeth |
+| C36 | "Startup: all running; periodic: expired leases" with one signature `fail_interrupted(now)` was ambiguous | `fail_interrupted(now)` fails running jobs with `lease_expires_at <= now`; startup passes `now + lease_s` | Nisheeth |
